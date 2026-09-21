@@ -132,6 +132,23 @@ never imports the level above it.
 | `/auth` | Log in / Sign up, one route with two tabs |
 | `/profile` | Account, theme, default vehicle, home location, export |
 
+## API (planned, not built yet)
+
+The client already calls these through `client/src/api/httpApi.js`. The Express
+server in `server/` will provide them; right now it is still the course
+template's example API.
+
+| Method | Path | What it does |
+| --- | --- | --- |
+| GET | `/api/places?q=` | Search places (Nominatim) |
+| GET | `/api/route` | Distance plus traffic and no-traffic travel time (TomTom) |
+| GET | `/api/prices` | Weekly DOE fuel prices |
+| GET | `/api/cars?q=` | Search the Philippine car catalog |
+| GET, POST | `/api/vehicles` | List or add your vehicles |
+| DELETE | `/api/vehicles/:id` | Remove a vehicle |
+| GET, POST | `/api/trips` | List or save trips |
+| DELETE | `/api/account` | Delete your account data |
+
 ## Architecture
 
 The React client is the only thing the user loads. Every screen gets its data
@@ -142,6 +159,17 @@ prices, vehicles and trips. The two-number estimate itself is a pure function in
 `client/src/lib/estimate.js` and runs in the browser, so changing passengers or
 cargo updates the figures without a request.
 
+## Known issues
+
+- The server is still the template's example. There is no PostgreSQL, no TomTom
+  and no Nominatim wired up yet, so the app only runs in demo mode.
+- The car catalog in `seed.json` has a handful of sample cars, not the real 50 to
+  80 Philippine vehicles the project targets.
+- The TomTom free tier changed pricing on 1 July 2026 and has not been re-checked
+  against this project. If traffic data is unavailable once it is wired up, the
+  app should fall back to the ideal-only estimate.
+- There is no real authentication yet. Session is simulated for demo mode.
+
 ## What I would do next
 
 - Replace the template's example server with the GAS API: the routes listed in
@@ -151,9 +179,9 @@ cargo updates the figures without a request.
 - Real accounts with email, password and JWT, moving a guest's saved trips to the
   account on first sign-up
 
-## Author
+## Developer
 
-Mark Harold T. Valderrama, CS-402. 6APSI final project.
+Kimchi © 2026
 
 ## AI use
 
