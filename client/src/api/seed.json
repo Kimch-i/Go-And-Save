@@ -1,8 +1,419 @@
-[
-  { "id": "seed-1", "place": "Library, third floor", "description": "Chairs rearranged overnight, every time. The night guard says he locks the room himself.", "spookiness": 3, "reported_at": "2026-08-01T14:20:00.000Z" },
-  { "id": "seed-2", "place": "Old gym", "description": "Lights flicker in a fixed pattern after 9pm, always three short and one long.", "spookiness": 4, "reported_at": "2026-08-03T11:05:00.000Z" },
-  { "id": "seed-3", "place": "Parking basement", "description": "Footsteps with no one there. Reported separately by three different people in one week, which is what makes this one hard to dismiss. Two of them were alone at the time and did not know about the others. This entry is deliberately long, because a seed row of four words hides every text-wrapping bug you have.", "spookiness": 5, "reported_at": "2026-08-05T22:40:00.000Z" },
-  { "id": "seed-4", "place": "Canteen", "description": "A cold spot near the back door, every morning before seven.", "spookiness": 1, "reported_at": "2026-08-06T07:15:00.000Z" },
-  { "id": "seed-5", "place": "AB Building stairwell", "description": "", "spookiness": 2, "reported_at": "2026-08-08T18:30:00.000Z" },
-  { "id": "seed-6", "place": "Chapel garden", "description": "Someone humming. Stops the moment you turn around.", "spookiness": 3, "reported_at": "2026-08-10T05:50:00.000Z" }
-]
+{
+  "cars": [
+    {
+      "id": 1,
+      "make": "Toyota",
+      "model": "Vios",
+      "yearFrom": 2018,
+      "yearTo": 2022,
+      "fuelType": "gasoline",
+      "kmPerLiterCity": 15,
+      "kmPerLiterHighway": 19,
+      "kerbWeightKg": 1075,
+      "idleRateLph": 0.7
+    },
+    {
+      "id": 2,
+      "make": "Toyota",
+      "model": "Vios",
+      "yearFrom": 2023,
+      "yearTo": null,
+      "fuelType": "gasoline",
+      "kmPerLiterCity": 16,
+      "kmPerLiterHighway": 20,
+      "kerbWeightKg": 1105,
+      "idleRateLph": 0.7
+    },
+    {
+      "id": 3,
+      "make": "Toyota",
+      "model": "Vios GR-S",
+      "yearFrom": 2021,
+      "yearTo": null,
+      "fuelType": "gasoline",
+      "kmPerLiterCity": 14,
+      "kmPerLiterHighway": 18,
+      "kerbWeightKg": 1110,
+      "idleRateLph": 0.7
+    },
+    {
+      "id": 4,
+      "make": "Toyota",
+      "model": "Innova",
+      "yearFrom": 2016,
+      "yearTo": null,
+      "fuelType": "diesel",
+      "kmPerLiterCity": 12.5,
+      "kmPerLiterHighway": 15.5,
+      "kerbWeightKg": 1755,
+      "idleRateLph": 0.9
+    },
+    {
+      "id": 5,
+      "make": "Toyota",
+      "model": "Hilux",
+      "yearFrom": 2016,
+      "yearTo": null,
+      "fuelType": "diesel",
+      "kmPerLiterCity": 11,
+      "kmPerLiterHighway": 14,
+      "kerbWeightKg": 1995,
+      "idleRateLph": 1
+    },
+    {
+      "id": 6,
+      "make": "Mitsubishi",
+      "model": "Mirage G4",
+      "yearFrom": 2017,
+      "yearTo": null,
+      "fuelType": "gasoline",
+      "kmPerLiterCity": 19,
+      "kmPerLiterHighway": 23,
+      "kerbWeightKg": 920,
+      "idleRateLph": 0.5
+    },
+    {
+      "id": 7,
+      "make": "Toyota",
+      "model": "Avanza",
+      "yearFrom": 2019,
+      "yearTo": null,
+      "fuelType": "gasoline",
+      "kmPerLiterCity": 13,
+      "kmPerLiterHighway": 16,
+      "kerbWeightKg": 1170,
+      "idleRateLph": 0.8
+    },
+    {
+      "id": 8,
+      "make": "Suzuki",
+      "model": "Ertiga",
+      "yearFrom": 2019,
+      "yearTo": null,
+      "fuelType": "gasoline",
+      "kmPerLiterCity": 14,
+      "kmPerLiterHighway": 18,
+      "kerbWeightKg": 1180,
+      "idleRateLph": 0.7
+    },
+    {
+      "id": 9,
+      "make": "Honda",
+      "model": "Click 125i",
+      "yearFrom": 2018,
+      "yearTo": null,
+      "fuelType": "gasoline",
+      "kmPerLiterCity": 45,
+      "kmPerLiterHighway": 50,
+      "kerbWeightKg": 105,
+      "idleRateLph": 0.2
+    }
+  ],
+  "fuelPrices": [
+    {
+      "id": 1,
+      "fuelType": "gasoline",
+      "pricePerLiter": 59.2,
+      "weekOf": "2026-06-08"
+    },
+    {
+      "id": 2,
+      "fuelType": "diesel",
+      "pricePerLiter": 56.1,
+      "weekOf": "2026-06-08"
+    },
+    {
+      "id": 3,
+      "fuelType": "gasoline",
+      "pricePerLiter": 59.8,
+      "weekOf": "2026-06-15"
+    },
+    {
+      "id": 4,
+      "fuelType": "diesel",
+      "pricePerLiter": 56.4,
+      "weekOf": "2026-06-15"
+    },
+    {
+      "id": 5,
+      "fuelType": "gasoline",
+      "pricePerLiter": 60.4,
+      "weekOf": "2026-06-22"
+    },
+    {
+      "id": 6,
+      "fuelType": "diesel",
+      "pricePerLiter": 57,
+      "weekOf": "2026-06-22"
+    },
+    {
+      "id": 7,
+      "fuelType": "gasoline",
+      "pricePerLiter": 60.1,
+      "weekOf": "2026-06-29"
+    },
+    {
+      "id": 8,
+      "fuelType": "diesel",
+      "pricePerLiter": 56.6,
+      "weekOf": "2026-06-29"
+    },
+    {
+      "id": 9,
+      "fuelType": "gasoline",
+      "pricePerLiter": 61.3,
+      "weekOf": "2026-07-06"
+    },
+    {
+      "id": 10,
+      "fuelType": "diesel",
+      "pricePerLiter": 57.4,
+      "weekOf": "2026-07-06"
+    },
+    {
+      "id": 11,
+      "fuelType": "gasoline",
+      "pricePerLiter": 62,
+      "weekOf": "2026-07-13"
+    },
+    {
+      "id": 12,
+      "fuelType": "diesel",
+      "pricePerLiter": 58,
+      "weekOf": "2026-07-13"
+    },
+    {
+      "id": 13,
+      "fuelType": "gasoline",
+      "pricePerLiter": 61.6,
+      "weekOf": "2026-07-20"
+    },
+    {
+      "id": 14,
+      "fuelType": "diesel",
+      "pricePerLiter": 57.8,
+      "weekOf": "2026-07-20"
+    },
+    {
+      "id": 15,
+      "fuelType": "gasoline",
+      "pricePerLiter": 62.4,
+      "weekOf": "2026-07-27"
+    },
+    {
+      "id": 16,
+      "fuelType": "diesel",
+      "pricePerLiter": 58.3,
+      "weekOf": "2026-07-27"
+    },
+    {
+      "id": 17,
+      "fuelType": "gasoline",
+      "pricePerLiter": 62.8,
+      "weekOf": "2026-08-03"
+    },
+    {
+      "id": 18,
+      "fuelType": "diesel",
+      "pricePerLiter": 58.6,
+      "weekOf": "2026-08-03"
+    },
+    {
+      "id": 19,
+      "fuelType": "gasoline",
+      "pricePerLiter": 63.1,
+      "weekOf": "2026-08-10"
+    },
+    {
+      "id": 20,
+      "fuelType": "diesel",
+      "pricePerLiter": 58.9,
+      "weekOf": "2026-08-10"
+    },
+    {
+      "id": 21,
+      "fuelType": "gasoline",
+      "pricePerLiter": 63.2,
+      "weekOf": "2026-08-17"
+    },
+    {
+      "id": 22,
+      "fuelType": "diesel",
+      "pricePerLiter": 58.6,
+      "weekOf": "2026-08-17"
+    },
+    {
+      "id": 23,
+      "fuelType": "gasoline",
+      "pricePerLiter": 64,
+      "weekOf": "2026-08-24"
+    },
+    {
+      "id": 24,
+      "fuelType": "diesel",
+      "pricePerLiter": 59.4,
+      "weekOf": "2026-08-24"
+    }
+  ],
+  "places": [
+    {
+      "label": "Porac, Pampanga",
+      "lat": 15.0719,
+      "lon": 120.542
+    },
+    {
+      "label": "Angeles City, Pampanga",
+      "lat": 15.145,
+      "lon": 120.5887
+    },
+    {
+      "label": "SM City Clark, Angeles",
+      "lat": 15.1686,
+      "lon": 120.5801
+    },
+    {
+      "label": "Mabalacat, Pampanga",
+      "lat": 15.2227,
+      "lon": 120.574
+    },
+    {
+      "label": "San Fernando, Pampanga",
+      "lat": 15.0286,
+      "lon": 120.6898
+    },
+    {
+      "label": "Baguio City, Benguet",
+      "lat": 16.4023,
+      "lon": 120.596
+    },
+    {
+      "label": "Subic Bay, Zambales",
+      "lat": 14.8292,
+      "lon": 120.2828
+    },
+    {
+      "label": "Manila",
+      "lat": 14.5995,
+      "lon": 120.9842
+    }
+  ],
+  "sampleRoutes": {
+    "Porac, Pampanga|Angeles City, Pampanga": {
+      "km": 16.2,
+      "freeMin": 24,
+      "trafficMin": 42
+    },
+    "Porac, Pampanga|SM City Clark, Angeles": {
+      "km": 12.4,
+      "freeMin": 18,
+      "trafficMin": 29
+    },
+    "Porac, Pampanga|Mabalacat, Pampanga": {
+      "km": 19.7,
+      "freeMin": 26,
+      "trafficMin": 40
+    },
+    "Porac, Pampanga|San Fernando, Pampanga": {
+      "km": 24.8,
+      "freeMin": 31,
+      "trafficMin": 48
+    },
+    "Porac, Pampanga|Baguio City, Benguet": {
+      "km": 184,
+      "freeMin": 186,
+      "trafficMin": 203
+    },
+    "Porac, Pampanga|Subic Bay, Zambales": {
+      "km": 58.3,
+      "freeMin": 52,
+      "trafficMin": 61
+    },
+    "Porac, Pampanga|Manila": {
+      "km": 88.6,
+      "freeMin": 96,
+      "trafficMin": 151
+    }
+  },
+  "vehicles": [
+    {
+      "id": 1,
+      "nickname": "Toyota Vios 2020",
+      "carModelId": 1,
+      "fuelType": "gasoline",
+      "kmPerLiter": 15,
+      "idleRateLph": 0.7,
+      "kerbWeightKg": 1075
+    },
+    {
+      "id": 2,
+      "nickname": "Family Hilux",
+      "carModelId": 5,
+      "fuelType": "diesel",
+      "kmPerLiter": 11,
+      "idleRateLph": 1,
+      "kerbWeightKg": 1995
+    }
+  ],
+  "trips": [
+    {
+      "id": 101,
+      "originLabel": "Porac, Pampanga",
+      "originLat": 15.0719,
+      "originLon": 120.542,
+      "destLabel": "Angeles City, Pampanga",
+      "destLat": 15.145,
+      "destLon": 120.5887,
+      "distanceKm": 16.2,
+      "vehicleId": 1,
+      "passengers": 1,
+      "cargoKg": 0,
+      "idealLiters": 1.08,
+      "idealCost": 69.12,
+      "actualLiters": 1.29,
+      "actualCost": 82.56,
+      "delayMinutes": 18,
+      "roundTrip": false,
+      "daysAgo": 2
+    },
+    {
+      "id": 102,
+      "originLabel": "Porac, Pampanga",
+      "originLat": 15.0719,
+      "originLon": 120.542,
+      "destLabel": "SM City Clark, Angeles",
+      "destLat": 15.1686,
+      "destLon": 120.5801,
+      "distanceKm": 12.4,
+      "vehicleId": 1,
+      "passengers": 2,
+      "cargoKg": 0,
+      "idealLiters": 0.84,
+      "idealCost": 53.7,
+      "actualLiters": 0.97,
+      "actualCost": 61.91,
+      "delayMinutes": 11,
+      "roundTrip": false,
+      "daysAgo": 4
+    },
+    {
+      "id": 103,
+      "originLabel": "Porac, Pampanga",
+      "originLat": 15.0719,
+      "originLon": 120.542,
+      "destLabel": "Baguio City, Benguet",
+      "destLat": 16.4023,
+      "destLon": 120.596,
+      "distanceKm": 184,
+      "vehicleId": 2,
+      "passengers": 5,
+      "cargoKg": 40,
+      "idealLiters": 17.92,
+      "idealCost": 1064.57,
+      "actualLiters": 18.21,
+      "actualCost": 1081.4,
+      "delayMinutes": 17,
+      "roundTrip": false,
+      "daysAgo": 9
+    }
+  ]
+}

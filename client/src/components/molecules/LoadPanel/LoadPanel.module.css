@@ -1,0 +1,40 @@
+.panel {
+  padding: var(--space-2) 0;
+  margin-bottom: var(--space-2);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.summary {
+  display: flex;
+  list-style: none;
+  cursor: pointer;
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary::after {
+  content: "+";
+  margin-left: auto;
+  font-size: var(--size-body);
+  line-height: 1.2;
+}
+
+.panel[open] .summary::after {
+  content: "\2013";
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.note {
+  margin-top: 12px;
+}

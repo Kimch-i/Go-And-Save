@@ -1,0 +1,13 @@
+.page {
+  max-width: 520px;
+}
+
+.title {
+  margin-top: var(--space-2);
+}
+
+.error {
+  margin-bottom: var(--space-2);
+  font-size: var(--size-small);
+  color: var(--danger);
+}

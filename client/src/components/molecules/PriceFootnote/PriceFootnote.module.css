@@ -1,0 +1,6 @@
+.footnote {
+  max-width: 62ch;
+  margin-top: var(--space-2);
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}

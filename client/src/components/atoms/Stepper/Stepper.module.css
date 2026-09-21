@@ -1,0 +1,37 @@
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.stepper button {
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.stepper button:hover:not(:disabled) {
+  background: var(--surface-hi);
+  color: var(--text);
+}
+
+.stepper button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

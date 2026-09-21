@@ -1,169 +1,126 @@
-import { useEffect, useState } from 'react'
-import { listSightings, createSighting, deleteSighting } from './api'
-import DemoNotice from './components/DemoNotice.jsx'
+// Routes, plus the state more than one screen needs: vehicles, fuel prices, theme and session.
 
-// A deliberately small working app. Replace all of it with your own project.
-//
-// What is worth keeping is the SHAPE: four states rather than two, a loading
-// message that admits a free-tier server can be slow to wake, and errors that
-// say something rather than rendering an empty list.
-
-const EMPTY_FORM = { place: '', description: '', spookiness: 3 }
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router';
+import AppLayout from './pages/AppLayout/AppLayout.jsx';
+import TripPlannerPage from './pages/TripPlannerPage/TripPlannerPage.jsx';
+import VehiclesPage from './pages/VehiclesPage/VehiclesPage.jsx';
+import AddVehiclePage from './pages/AddVehiclePage/AddVehiclePage.jsx';
+import PricesPage from './pages/PricesPage/PricesPage.jsx';
+import TripsPage from './pages/TripsPage/TripsPage.jsx';
+import AuthPage from './pages/AuthPage/AuthPage.jsx';
+import ProfilePage from './pages/ProfilePage/ProfilePage.jsx';
+import NotFoundPage from './pages/NotFoundPage/NotFoundPage.jsx';
+import { listFuelPrices, listVehicles, createVehicle, deleteVehicle, deleteAccountData } from './api/index.js';
+import * as storage from './services/storage.js';
+import { applyTheme } from './lib/theme.js';
 
 export default function App() {
-  const [status, setStatus] = useState('loading')   // loading | ready | error
-  const [rows, setRows] = useState([])
-  const [error, setError] = useState(null)
-  const [slow, setSlow] = useState(false)
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [saving, setSaving] = useState(false)
-
-  async function load() {
-    setStatus('loading')
-    setError(null)
-
-    // A free-tier API sleeps. If this is taking a while, say so rather than
-    // spinning silently, which looks broken. See page 6.
-    const timer = setTimeout(() => setSlow(true), 3000)
-
-    try {
-      setRows(await listSightings())
-      setStatus('ready')
-    } catch (caught) {
-      setError(caught)
-      setStatus('error')
-    } finally {
-      clearTimeout(timer)
-      setSlow(false)
-    }
-  }
+  const [vehicles, setVehicles] = useState([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(true);
+  const [fuelPrices, setFuelPrices] = useState([]);
+  const [session, setSession] = useState(storage.getSession);
+  const [themeChoice, setThemeChoice] = useState(storage.getThemeChoice);
+  const [theme, setTheme] = useState(() => applyTheme(storage.getThemeChoice()));
 
   useEffect(() => {
-    load()
-  }, [])
+    listVehicles().then((list) => {
+      setVehicles(list);
+      setVehiclesLoading(false);
+    });
+    listFuelPrices().then(setFuelPrices);
+  }, []);
 
-  async function handleSubmit(event) {
-    event.preventDefault()
-    if (!form.place.trim()) return
-
-    setSaving(true)
-    try {
-      const created = await createSighting({
-        place: form.place.trim(),
-        description: form.description.trim(),
-        spookiness: Number(form.spookiness),
-      })
-      setRows([created, ...rows])
-      setForm(EMPTY_FORM)
-    } catch (caught) {
-      setError(caught)
-    } finally {
-      setSaving(false)
-    }
+  function changeTheme(choice) {
+    setTheme(applyTheme(choice));
+    setThemeChoice(choice);
+    storage.saveThemeChoice(choice);
   }
 
-  async function handleDelete(id) {
-    const previous = rows
-    setRows(rows.filter((row) => row.id !== id))   // optimistic
-    try {
-      await deleteSighting(id)
-    } catch (caught) {
-      setRows(previous)                            // put it back on failure
-      setError(caught)
-    }
+  function toggleTheme() {
+    changeTheme(theme === 'dark' ? 'light' : 'dark');
+  }
+
+  async function addVehicle(input) {
+    const vehicle = await createVehicle(input);
+    setVehicles((current) => [...current, vehicle]);
+
+    const prefs = storage.getPrefs();
+    storage.savePrefs({ lastVehicleId: vehicle.id, defaultVehicleId: prefs.defaultVehicleId || vehicle.id });
+    return vehicle;
+  }
+
+  async function removeVehicle(id) {
+    await deleteVehicle(id);
+    setVehicles((current) => current.filter((vehicle) => vehicle.id !== id));
+
+    const prefs = storage.getPrefs();
+    storage.savePrefs({
+      defaultVehicleId: prefs.defaultVehicleId === id ? null : prefs.defaultVehicleId,
+      lastVehicleId: prefs.lastVehicleId === id ? null : prefs.lastVehicleId,
+    });
+  }
+
+  function logIn(name, email) {
+    const next = { name, email };
+    setSession(next);
+    storage.saveSession(next);
+  }
+
+  function logOut() {
+    setSession(null);
+    storage.clearSession();
+  }
+
+  async function deleteAccount() {
+    await deleteAccountData();
+    storage.clearAll();
+    setSession(null);
+    setVehicles([]);
   }
 
   return (
-    <div className="page">
-      <header>
-        <h1>HAUnted Sightings</h1>
-        <p className="lede">
-          Replace this with your own project. This one is here so the template
-          has something that works.
-        </p>
-      </header>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Routes>
+        <Route path="/auth" element={<AuthPage session={session} vehicles={vehicles} onLogIn={logIn} />} />
 
-      <DemoNotice />
-
-      {error && (
-        <p className="error" role="alert">
-          {error.message} <button onClick={load}>Try again</button>
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit} className="card">
-        <h2>Report a sighting</h2>
-
-        <label htmlFor="place">Place</label>
-        <input
-          id="place"
-          value={form.place}
-          onChange={(event) => setForm({ ...form, place: event.target.value })}
-          maxLength={120}
-          required
-        />
-
-        <label htmlFor="description">What happened</label>
-        <textarea
-          id="description"
-          value={form.description}
-          onChange={(event) => setForm({ ...form, description: event.target.value })}
-          maxLength={2000}
-          rows={3}
-        />
-
-        <label htmlFor="spookiness">Spookiness, 1 to 5</label>
-        <input
-          id="spookiness"
-          type="number"
-          min="1"
-          max="5"
-          value={form.spookiness}
-          onChange={(event) => setForm({ ...form, spookiness: event.target.value })}
-          required
-        />
-
-        <button type="submit" disabled={saving}>
-          {saving ? 'Saving...' : 'Add sighting'}
-        </button>
-      </form>
-
-      {/* Four states. Empty and error are different things and must not look
-          the same: an empty list means "nothing here yet", an error means
-          "we could not find out". */}
-      {status === 'loading' && (
-        <p className="muted">
-          Loading{slow ? '. The server may be waking up, which can take up to a minute.' : '...'}
-        </p>
-      )}
-
-      {status === 'ready' && rows.length === 0 && (
-        <p className="muted">No sightings reported yet. Add the first one above.</p>
-      )}
-
-      {status === 'ready' && rows.length > 0 && (
-        <ul className="list">
-          {rows.map((row) => (
-            <li key={row.id} className="card">
-              <div className="row-head">
-                <h3>{row.place}</h3>
-                <span className="spooky" aria-label={`Spookiness ${row.spookiness} of 5`}>
-                  {'*'.repeat(row.spookiness)}
-                </span>
-              </div>
-              {row.description
-                ? <p>{row.description}</p>
-                : <p className="muted">No description given.</p>}
-              <footer>
-                <time dateTime={row.reported_at}>
-                  {new Date(row.reported_at).toLocaleString()}
-                </time>
-                <button onClick={() => handleDelete(row.id)}>Delete</button>
-              </footer>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
+        <Route element={<AppLayout session={session} theme={theme} onToggleTheme={toggleTheme} />}>
+          <Route
+            index
+            element={
+              <TripPlannerPage
+                vehicles={vehicles}
+                vehiclesLoading={vehiclesLoading}
+                fuelPrices={fuelPrices}
+                session={session}
+                theme={theme}
+              />
+            }
+          />
+          <Route
+            path="vehicles"
+            element={<VehiclesPage vehicles={vehicles} vehiclesLoading={vehiclesLoading} onRemoveVehicle={removeVehicle} />}
+          />
+          <Route path="vehicles/add" element={<AddVehiclePage onAddVehicle={addVehicle} />} />
+          <Route path="prices" element={<PricesPage fuelPrices={fuelPrices} />} />
+          <Route path="trips" element={<TripsPage vehicles={vehicles} session={session} />} />
+          <Route
+            path="profile"
+            element={
+              <ProfilePage
+                session={session}
+                vehicles={vehicles}
+                themeChoice={themeChoice}
+                onThemeChange={changeTheme}
+                onUpdateAccount={logIn}
+                onLogOut={logOut}
+                onDeleteAccount={deleteAccount}
+              />
+            }
+          />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }

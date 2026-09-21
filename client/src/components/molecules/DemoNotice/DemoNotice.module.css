@@ -1,0 +1,12 @@
+.notice {
+  padding: 10px 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-soft);
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.notice strong {
+  font-weight: 600;
+  color: var(--text);
+}

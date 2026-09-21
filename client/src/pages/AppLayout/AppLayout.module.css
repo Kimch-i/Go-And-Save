@@ -1,0 +1,9 @@
+.main {
+  padding: var(--space-3) 0 var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding-top: var(--space-4);
+  }
+}

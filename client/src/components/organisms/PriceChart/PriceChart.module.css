@@ -1,0 +1,17 @@
+.box {
+  padding: var(--space-2);
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.box svg {
+  display: block;
+}
+
+.axis {
+  fill: var(--text-muted);
+  font-size: 11px;
+  font-family: var(--font);
+}

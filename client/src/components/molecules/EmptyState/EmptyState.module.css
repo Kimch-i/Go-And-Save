@@ -1,0 +1,23 @@
+.empty {
+  padding: var(--space-4) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.error {
+  border-color: var(--danger);
+}
+
+.title {
+  margin-bottom: 4px;
+  font-size: var(--size-body);
+  color: var(--text);
+}
+
+.action {
+  margin-top: var(--space-2);
+}

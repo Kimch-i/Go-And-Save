@@ -1,0 +1,25 @@
+.planner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.stage {
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .planner {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+
+  .rail {
+    width: 236px;
+    flex: none;
+  }
+
+  .stage {
+    flex: 1;
+  }
+}

@@ -1,0 +1,16 @@
+.explainer {
+  max-width: 62ch;
+  margin-top: var(--space-2);
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.explainer summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--brand);
+}
+
+.explainer p {
+  margin-top: var(--space-1);
+}

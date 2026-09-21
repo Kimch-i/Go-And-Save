@@ -1,0 +1,17 @@
+.card {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.line {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.line b {
+  font-weight: 400;
+  color: var(--text);
+}

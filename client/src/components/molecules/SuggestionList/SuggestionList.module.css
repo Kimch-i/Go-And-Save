@@ -1,0 +1,36 @@
+.list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.list button {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  font-size: var(--size-small);
+}
+
+.list li:last-child button {
+  border-bottom: 0;
+}
+
+.list button:hover,
+.list button:focus-visible {
+  background: var(--surface-hi);
+  outline-offset: -2px;
+}

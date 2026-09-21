@@ -1,40 +1,51 @@
-// The real client. Every function here talks to YOUR Express API.
-//
-// This is the file that matters for your finals project. mockApi.js exists so
-// you can build the interface before this has anywhere to point.
-
-const BASE = import.meta.env.VITE_API_BASE_URL || ''
+// Calls the GAS Express API. Routes the server must provide:
+//   GET /api/places?q=  GET /api/route?from=&to=  GET /api/prices  GET /api/cars?q=
+//   GET+POST /api/vehicles  DELETE /api/vehicles/:id  GET+POST /api/trips  DELETE /api/account
+const BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 async function request(path, options) {
   const response = await fetch(`${BASE}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
-  })
+  });
 
   if (!response.ok) {
-    // Try to use the API's own message; fall back to the status line.
-    let message = `${response.status} ${response.statusText}`
+    let message = `${response.status} ${response.statusText}`;
     try {
-      const body = await response.json()
-      if (body?.error) message = body.error
+      const body = await response.json();
+      if (body?.error) message = body.error;
     } catch {
-      // The body was not JSON. The status line is all we have.
     }
-    throw new Error(message)
+    throw new Error(message);
   }
 
-  return response.status === 204 ? null : response.json()
+  return response.status === 204 ? null : response.json();
 }
 
-export const listSightings = () => request('/api/sightings')
+const coords = (place) => `${place.lat},${place.lon}`;
 
-export const getSighting = (id) => request(`/api/sightings/${id}`)
+export const searchPlaces = (query) =>
+  request(`/api/places?q=${encodeURIComponent(query)}`);
 
-export const createSighting = (input) =>
-  request('/api/sightings', { method: 'POST', body: JSON.stringify(input) })
+export const getRoute = (origin, destination) =>
+  request(`/api/route?from=${coords(origin)}&to=${coords(destination)}`);
 
-export const updateSighting = (id, input) =>
-  request(`/api/sightings/${id}`, { method: 'PUT', body: JSON.stringify(input) })
+export const listFuelPrices = () => request('/api/prices');
 
-export const deleteSighting = (id) =>
-  request(`/api/sightings/${id}`, { method: 'DELETE' })
+export const searchCars = (query) =>
+  request(`/api/cars?q=${encodeURIComponent(query)}`);
+
+export const listVehicles = () => request('/api/vehicles');
+
+export const createVehicle = (input) =>
+  request('/api/vehicles', { method: 'POST', body: JSON.stringify(input) });
+
+export const deleteVehicle = (id) =>
+  request(`/api/vehicles/${id}`, { method: 'DELETE' });
+
+export const listTrips = () => request('/api/trips');
+
+export const createTrip = (input) =>
+  request('/api/trips', { method: 'POST', body: JSON.stringify(input) });
+
+export const deleteAccountData = () => request('/api/account', { method: 'DELETE' });

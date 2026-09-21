@@ -1,0 +1,45 @@
+.card {
+  padding: var(--space-2) 0;
+}
+
+.label {
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.amount {
+  margin: 6px 0 3px;
+  font-size: var(--size-heading);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-muted);
+}
+
+.meta {
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.emphasis {
+  padding: var(--space-2) var(--space-3);
+  background: var(--brand-quiet);
+  border: 1px solid var(--brand-quiet-line);
+  border-radius: var(--radius-md);
+}
+
+.emphasis .label,
+.emphasis .meta {
+  color: var(--brand-quiet-muted);
+}
+
+.emphasis .amount {
+  font-size: var(--size-display);
+  color: var(--brand-quiet-text);
+}
+
+@media (max-width: 767px) {
+  .emphasis {
+    order: -1;
+  }
+}

@@ -1,0 +1,98 @@
+/* Design tokens. Components use role variables (layer 2), never raw colours (layer 1). */
+/* LAYER 1: raw palette, never used by a component */
+:root {
+  --amber-400: #F5B857;
+  --amber-500: #EF9F27;
+  --amber-700: #96590A;
+  --amber-900: #412402;
+  --amber-050: #FDF3E2;
+  --amber-ink: #3D2200;
+
+  --green-400: #5DCAA5;
+  --green-700: #0F7256;
+  --green-900: #0F3D30;
+  --green-050: #E4F5EE;
+
+  --ink-900: #0C1210;
+  --ink-800: #101613;
+  --ink-700: #182220;
+  --ink-600: #1E2B27;
+  --ink-500: #2A3B33;
+  --ink-300: #7C8F86;
+  --ink-050: #EDF3F0;
+
+  --paper-000: #FFFFFF;
+  --paper-050: #FBFAF7;
+  --paper-100: #F3F2EE;
+  --paper-200: #E7E7E2;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+
+  --radius-sm: 6px;   /* inputs, tags */
+  --radius-md: 10px;  /* cards */
+
+  --size-display: 32px;
+  --size-heading: 20px;
+  --size-body: 16px;
+  --size-small: 13px;
+
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --header-height: 58px;
+}
+
+/* LAYER 2: roles, pointed at a raw colour once per theme */
+[data-theme="dark"] {
+  --bg: var(--ink-800);
+  --surface: var(--ink-700);
+  --surface-hi: var(--ink-600);
+  --line: var(--ink-500);
+  --line-soft: #212E29;
+  --text: var(--ink-050);
+  --text-muted: var(--ink-300);
+
+  --brand: var(--amber-500);          /* links, active states, focus ring */
+  --brand-fill: var(--amber-500);     /* primary button, route line */
+  --brand-on-fill: var(--amber-ink);  /* text on brand-fill, 6.76:1 */
+  --brand-quiet: var(--amber-900);    /* the "leaving now" card */
+  --brand-quiet-line: #854F0B;
+  --brand-quiet-text: #FAEEDA;
+  --brand-quiet-muted: var(--amber-400);
+
+  --good: var(--green-400);           /* route start marker and price tags only */
+  --good-fill: var(--green-400);
+  --good-on-fill: var(--green-900);
+
+  --danger: #F08A7E;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: var(--paper-050);
+  --surface: var(--paper-000);
+  --surface-hi: var(--paper-100);
+  --line: var(--paper-200);
+  --line-soft: #EDEDE8;
+  --text: #16211C;
+  --text-muted: #5C6B64;
+
+  --brand: var(--amber-700);
+  --brand-fill: var(--amber-500);
+  --brand-on-fill: var(--amber-ink);
+  --brand-quiet: var(--amber-050);
+  --brand-quiet-line: #E8C489;
+  --brand-quiet-text: #4A2C05;
+  --brand-quiet-muted: #7A4708;
+
+  --good: var(--green-700);
+  --good-fill: var(--green-050);
+  --good-on-fill: var(--green-700);
+
+  --danger: #A8321F;
+  --shadow: 0 8px 24px rgba(20, 32, 27, .08);
+  color-scheme: light;
+}

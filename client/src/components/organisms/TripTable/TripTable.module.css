@@ -1,0 +1,38 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 0 0 var(--space-1);
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  font-weight: 400;
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}
+
+.table th + th {
+  padding-left: var(--space-2);
+}
+
+.table th.money {
+  text-align: right;
+}
+
+.cards {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 767px) {
+  .table {
+    display: none;
+  }
+
+  .cards {
+    display: block;
+  }
+}

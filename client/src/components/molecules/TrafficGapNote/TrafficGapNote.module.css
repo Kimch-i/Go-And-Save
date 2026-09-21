@@ -1,0 +1,10 @@
+.extra {
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.month {
+  display: block;
+  font-size: var(--size-small);
+  color: var(--text-muted);
+}

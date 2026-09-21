@@ -1,0 +1,60 @@
+.pills {
+  margin-bottom: var(--space-3);
+}
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.chart {
+  min-width: 0;
+}
+
+.now {
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.amount {
+  margin: 5px 0 3px;
+  font-size: var(--size-display);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.advice {
+  padding: var(--space-2);
+  background: var(--brand-quiet);
+  border: 1px solid var(--brand-quiet-line);
+  border-radius: var(--radius-md);
+  color: var(--brand-quiet-muted);
+}
+
+.adviceTitle {
+  margin-bottom: 4px;
+  color: var(--brand-quiet-text);
+  font-weight: 500;
+}
+
+.note {
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .wrap {
+    flex-direction: row-reverse;
+  }
+
+  .side {
+    width: 260px;
+    flex: none;
+  }
+
+  .chart {
+    flex: 1;
+  }
+}
