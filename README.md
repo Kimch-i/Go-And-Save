@@ -1,31 +1,41 @@
-# Your Project Name
+# GAS — Gasolina Advisory System
 
-> **Replace this whole file.** It is a worked example of the README your project
-> will be graded from, not a file to leave as it is. Start with
-> [START-HERE.md](START-HERE.md).
+GAS tells a Philippine driver what a trip will cost in fuel before they leave:
+once for clear roads, and once for the traffic happening right now.
 
-One sentence saying what this does and who it is for.
-
-**Live site:** https://yourusername.github.io/your-repo-name/
-**API:** https://your-api.onrender.com/healthz
+**Live site:** https://kimch-i.github.io/Go-And-Save/
+**API:** not deployed yet
 **Demo video:** (link)
 
 > **This deployment is running in demo mode.** The interface is real; the backend
 > is simulated in your browser so the site works without a server. See
-> [Demo mode](#demo-mode) below. Delete this quote once your API is live.
+> [Demo mode](#demo-mode) below. Delete this quote once the API is live.
 
-![A screenshot of the main screen](docs/assets/screenshot.png)
+![The Trip Planner Page](docs/assets/TripPlanner.png)
+![List of Vehicles](docs/assets/Vehicles.png)
+![Price graph of Gasoline](docs/assets/FuelPriceGasoline.png)
+![Price graph of Diesel](docs/assets/FuelPriceDiesel.png)
+![List of Save Trips](docs/assets/SaveTrips.png)
 
 ## What it does
 
-- Report a sighting with a place, a description and a spookiness rating
-- Browse everything reported, newest first
-- Delete a report
+- Enter where you are starting from and where you are going, pick your car, and
+  say how many people and how much cargo are riding
+- See two peso figures side by side: **if the road were clear**, and **leaving now**
+  in current traffic, plus what traffic adds per trip and per month
+- Save trips and see what a repeated commute costs, and how much of it is lost to traffic
+- Pick your car from a catalog of Philippine-market vehicles instead of guessing your km/L
+- Check this week's DOE fuel price and whether it is worth filling up now
+
+Traffic does not change the distance, it changes the time. The extra cost is the
+fuel burned idling in the delay, which is why the two figures differ.
 
 ## Built with
 
-React and Vite on the front end, Express and PostgreSQL on the back end. The
-client is on GitHub Pages, the API on (host), the database on (host).
+React and Vite on the front end, with React Router, CSS Modules and Leaflet with
+OpenStreetMap tiles. Express and PostgreSQL on the back end, with route times from
+the TomTom Routing API and place search from Nominatim. The client is on GitHub
+Pages; the API and database hosts are not chosen yet.
 
 ## Demo mode
 
@@ -38,24 +48,11 @@ notice rather than on a silently broken build.
 
 | `VITE_USE_MOCK_API` | What happens |
 | --- | --- |
-| unset, or `true` | The client answers its own requests from `localStorage`. No server, no database, nothing shared between visitors. This is what the template ships with, so the GitHub Pages link works on day one. |
+| unset, or `true` | The client answers its own requests from `client/src/api/mockApi.js`. Routes, traffic times, car specs and DOE prices come from `seed.json`; saved vehicles and trips stay in your browser. |
 | `false` | The client calls the Express API at `VITE_API_BASE_URL`, which reads and writes real PostgreSQL. |
 
-**Demo mode is a starting point and a fallback, not a finished project.** Your
-finals submission is all three pieces deployed and talking to each other. Demo
-mode is there so you can build the interface in week one before the API exists,
-and so you have something to show if a free tier is asleep during your demo.
-
-GitHub Pages serves files and cannot run Node, so the API and the database can
-never live there. They go somewhere else:
-
-| Piece | Options |
-| --- | --- |
-| **API** | Render, Railway, Fly.io, Koyeb, a VPS, or [self-hosted behind a tunnel](../content/extending-your-app/11-self-hosting.md) |
-| **Database** | Neon, Supabase, Railway, Aiven, or your own PostgreSQL |
-
-`content/extending-your-app/` in your course workspace walks through all of it.
-Page 10 is the decision page if you do not know which to pick.
+Demo mode is a starting point and a fallback, not the finished project. The finals
+submission is all three pieces deployed and talking to each other.
 
 ## Running it yourself
 
@@ -65,32 +62,11 @@ Page 10 is the decision page if you do not know which to pick.
     npm install
     cp .env.example .env        # VITE_USE_MOCK_API stays true
     npm run dev                 # http://localhost:5173
+    npm test                    # the estimate maths, price trend and api layer
 
-**The whole stack.** Needs a PostgreSQL, either local or hosted.
-
-    # 1. the database
-    docker run --name my-pg -e POSTGRES_PASSWORD=devpassword \
-      -e POSTGRES_DB=haunted -p 5432:5432 -d postgres:17
-
-    # 2. the API
-    cd server
-    npm install
-    cp .env.example .env        # check DATABASE_URL
-    npm run db:reset            # creates the tables and adds sample rows
-    npm run dev                 # http://localhost:3000
-
-    # 3. the client, in another terminal
-    cd client
-    npm install
-    cp .env.example .env
-    # set VITE_USE_MOCK_API=false
-    npm run dev
-
-Check the API on its own before you blame the client:
-
-    curl http://localhost:3000/healthz     # is the process alive
-    curl http://localhost:3000/readyz      # is the database reachable
-    curl http://localhost:3000/api/sightings
+**The whole stack.** The `server/` folder is still the course template's example
+API. It becomes the GAS API next; the routes it needs are listed at the top of
+`client/src/api/httpApi.js`.
 
 ## Environment variables
 
@@ -101,74 +77,92 @@ placeholder values.
 | --- | --- | --- |
 | `DATABASE_URL` | server | PostgreSQL connection string. Contains a password |
 | `CORS_ORIGINS` | server | comma-separated origins allowed to call the API |
-| `NODE_ENV` | server | `production` on your host |
-| `PORT` | server | **set by the host**, do not set it yourself |
-| `VITE_USE_MOCK_API` | client, at build time | only `false` turns demo mode off; unset means on |
-| `VITE_API_BASE_URL` | client, at build time | your API's public URL, no trailing slash |
+| `TOMTOM_API_KEY` | server | for route and traffic times. Never in a `VITE_` variable |
+| `NODE_ENV` | server | `production` on the host |
+| `PORT` | server | set by the host |
+| `VITE_USE_MOCK_API` | client, at build time | only `false` turns demo mode off |
+| `VITE_API_BASE_URL` | client, at build time | the API's public URL, no trailing slash |
 
 Every `VITE_` value is compiled into the built JavaScript and is **public**.
-Never put a key, a password or a connection string in one.
 
 ## Deploying
 
-**Client, to GitHub Pages.** Already wired up in
-`.github/workflows/deploy-pages.yml`. Two one-time steps:
+**Client, to GitHub Pages.** `.github/workflows/deploy-pages.yml` builds and
+publishes on every push to `main` that touches `client/`. One-time setup:
 
-1. **Settings > Pages > Build and deployment > Source: GitHub Actions.** Without
-   this the workflow goes green and publishes nothing.
-2. Nothing else, until your API is live. Demo mode is the default, so the first
-   deploy works on its own. When the API is up, add `VITE_USE_MOCK_API` = `false`
-   and `VITE_API_BASE_URL` under **Settings > Secrets and variables > Actions >
-   Variables**, then re-run the workflow.
+1. The repository must be **public**.
+2. **Settings > Pages > Build and deployment > Source: GitHub Actions.**
+3. Once the API is live, set `VITE_USE_MOCK_API` = `false` and `VITE_API_BASE_URL`
+   under **Settings > Secrets and variables > Actions > Variables**, then re-run
+   the workflow.
 
-The repository must be **public** for Pages to serve it on a free account.
-
-**API and database.** Not automated here, because most hosts deploy straight from
-your repository with no workflow at all. Point your host at the `server/` folder,
-set the environment variables in its dashboard, and run `server/db/schema.sql`
-once against the hosted database.
+The workflow sets the base path to `/Go-And-Save/`, and the build copies
+`index.html` to `404.html`, so refreshing on `/trips` or `/vehicles` still works.
 
 ## Project structure
 
-    client/          React front end, built by Vite
-      src/api/       ONE interface, two implementations, chosen by a variable
-      src/components/
-    server/          Express API
-      db/            pool, schema.sql, seed.sql, and a runner for them
-    compose.yml      only if you self-host
-    docs/            your planning documents and weekly reports
+    client/
+      public/theme.js     sets the theme before first paint, so it never flashes
+      src/
+        App.jsx           routes, and the state more than one screen needs
+        api/              ONE interface, two implementations, chosen by a variable
+          index.js          the only file screens import data from
+          mockApi.js        simulated backend (seed.json + localStorage)
+          httpApi.js        the Express API
+        lib/              pure functions, no React: estimate.js, priceTrend.js, ...
+        services/         what stays in the browser: theme, preferences, session
+        styles/           tokens.css (two token layers) and base.css
+        components/
+          atoms/          Button, TextInput, Select, Checkbox, Stepper, Tag, Spinner, Logo
+          molecules/      LocationSearch, CostCard, LoadPanel, VehicleRow, TripRow, ...
+          organisms/      Header, Footer, TripForm, RouteMap, EstimateResult, TripTable, ...
+        pages/            one folder per route, plus AppLayout
+    server/               Express API (still the template's example)
+    docs/                 planning documents and weekly reports
+
+Each component is a folder with a `.jsx` file and a `.module.css` file. A level
+never imports the level above it.
+
+| Route | Screen |
+| --- | --- |
+| `/` | Trip Planner — works fully without an account |
+| `/vehicles`, `/vehicles/add` | Your vehicles, and the catalog search |
+| `/prices` | DOE prices, 12-week chart, fill-up-now reading |
+| `/trips` | Saved trips, monthly totals, lost to traffic |
+| `/auth` | Log in / Sign up, one route with two tabs |
+| `/profile` | Account, theme, default vehicle, home location, export |
 
 ## Architecture
 
-Three or four sentences, or a small diagram. Which piece talks to which, and
-where each one is hosted.
+The React client is the only thing the user loads. Every screen gets its data
+through `client/src/api/index.js`, which today answers from the browser and later
+calls the Express API. The API will call TomTom and Nominatim on the server, so no
+key reaches the browser, and read and write PostgreSQL for the car catalog, DOE
+prices, vehicles and trips. The two-number estimate itself is a pure function in
+`client/src/lib/estimate.js` and runs in the browser, so changing passengers or
+cargo updates the figures without a request.
 
 ## What I would do next
 
-Three honest bullets. This paragraph is worth more than it looks.
+- Replace the template's example server with the GAS API: the routes listed in
+  `httpApi.js`, the schema, and seeded car catalog and DOE price tables
+- Confirm the TomTom free tier still returns both travel time and no-traffic time
+  after its July 2026 pricing change, before wiring the planner to it
+- Real accounts with email, password and JWT, moving a guest's saved trips to the
+  account on first sign-up
 
 ## Author
 
-Your name, and a link. Course and section.
+Mark Harold T. Valderrama, CS-402. 6APSI final project.
 
 ## AI use
 
-If you used AI while building this, say so here. Honest disclosure is the
-standard in this course and increasingly outside it, and reporting heavy use
-accurately costs you nothing.
-
-This section is the last 10 points of the finals badge, and it wants three
-things:
-
 ![Built with AI assistance](https://img.shields.io/badge/built%20with-AI%20assistance-0b5fff)
 
-- the badge above, or one you like better
-- a line naming which assistant you used and how much of the work it touched
-- a link to [AI-USAGE.md](AI-USAGE.md), where the full account lives
-
-Keep the detail in `AI-USAGE.md` rather than here. This section is the summary a
-visitor reads; that file is the record the badge is graded from.
+Claude (Anthropic) was used as an AI coding assistant throughout the project for
+coding support, debugging, troubleshooting, and implementation assistance. The
+full details are available in [AI-USAGE.md](AI-USAGE.md).
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Put your own name in it.
+MIT, see [LICENSE](LICENSE).
