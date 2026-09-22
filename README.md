@@ -16,6 +16,8 @@ once for clear roads, and once for the traffic happening right now.
 ![Price graph of Gasoline](docs/assets/FuelPriceGasoline.png)
 ![Price graph of Diesel](docs/assets/FuelPriceDiesel.png)
 ![List of Save Trips](docs/assets/SaveTrips.png)
+![Page for LogIn](docs/assets/LogIn.png)
+![Page for SignUp](docs/assets/SignUp.png)
 
 ## What it does
 
