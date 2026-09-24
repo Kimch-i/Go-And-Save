@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS car_models (
   make                 TEXT NOT NULL,
   model                TEXT NOT NULL,
   year_from            INTEGER NOT NULL,
-  year_to              INTEGER NOT NULL,
+  year_to              INTEGER,
   fuel_type            TEXT NOT NULL CHECK (fuel_type IN ('gasoline', 'diesel')),
   km_per_liter_city    NUMERIC NOT NULL,
   km_per_liter_highway NUMERIC NOT NULL,
@@ -38,8 +38,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   fuel_type      TEXT NOT NULL CHECK (fuel_type IN ('gasoline', 'diesel')),
   km_per_liter   NUMERIC NOT NULL,
   idle_rate_lph  NUMERIC NOT NULL,
-  kerb_weight_kg NUMERIC NOT NULL,
-
+  kerb_weight_kg NUMERIC,
   FOREIGN KEY (user_id)
     REFERENCES users(id)
     ON DELETE CASCADE,
@@ -87,4 +86,3 @@ CREATE INDEX IF NOT EXISTS trips_user_id_created_at_idx
 -- Speeds up loading a user's saved vehicles
 CREATE INDEX IF NOT EXISTS vehicles_user_id_idx
   ON vehicles (user_id);
-
