@@ -4,6 +4,7 @@ import { pool } from './db/pool.js'
 import * as carModels from './db/carModelsRepo.js'
 import * as fuelPrices from './db/fuelPricesRepo.js'
 import { searchPlaces } from './nominatim.js'
+import { getRoute } from './tomtom.js'
 
 const app = express()
 
@@ -64,6 +65,29 @@ app.get('/api/places', async (request, response, next) => {
   } catch (error) {
     console.error('Nominatim search failed:', error.message)
     response.status(502).json({ error: 'Place search is unavailable right now' })
+  }
+})
+
+function parseCoords(value) {
+  if (typeof value !== 'string') return null
+  const [lat, lon] = value.split(',').map(Number)
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
+  return { lat, lon }
+}
+
+app.get('/api/route', async (request, response) => {
+  const origin = parseCoords(request.query.from)
+  const destination = parseCoords(request.query.to)
+
+  if (!origin || !destination) {
+    return response.status(400).json({ error: 'from and to must be "lat,lon"' })
+  }
+
+  try {
+    response.json(await getRoute(origin, destination))
+  } catch (error) {
+    console.error('Route lookup failed:', error.message)
+    response.status(502).json({ error: 'No route found between these two places.' })
   }
 })
 
