@@ -18,4 +18,6 @@ export const {
   listTrips,
   createTrip,
   deleteAccountData,
+  signUp,
+  logIn,
 } = implementation;

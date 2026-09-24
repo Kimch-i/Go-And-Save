@@ -164,3 +164,14 @@ function sketchGeometry(a, b) {
   }
   return points;
 }
+
+
+export async function signUp({ name, email }) {
+  await delay();
+  return { token: 'demo-token', user: { id: 1, name, email } };
+}
+
+export async function logIn({ email }) {
+  await delay();
+  return { token: 'demo-token', user: { id: 1, name: email.split('@')[0], email } };
+}

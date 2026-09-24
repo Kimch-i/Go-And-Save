@@ -5,15 +5,11 @@ import * as carModels from './db/carModelsRepo.js'
 import * as fuelPrices from './db/fuelPricesRepo.js'
 import { searchPlaces } from './nominatim.js'
 import { getRoute } from './tomtom.js'
+import * as users from './db/usersRepo.js'
+import { hashPassword, checkPassword, signToken } from './auth.js'
 
 const app = express()
 
-// CORS before the routes. Middleware registered after a route never sees that
-// route's requests, which is the m4 lesson showing up in production.
-//
-// Name your origins. app.use(cors()) with no options sends
-// Access-Control-Allow-Origin: *, which lets any site on the internet call this
-// API from a visitor's browser, and is incompatible with cookies.
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim())
@@ -22,13 +18,10 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
 app.use(cors({ origin: allowedOrigins }))
 app.use(express.json({ limit: '100kb' }))
 
-// Is the process alive?
 app.get('/healthz', (request, response) => {
   response.json({ ok: true })
 })
 
-// Is the database reachable? A different question, and the one that tells you
-// in two seconds which half of a problem you have.
 app.get('/readyz', async (request, response) => {
   try {
     await pool.query('SELECT 1')
@@ -91,19 +84,52 @@ app.get('/api/route', async (request, response) => {
   }
 })
 
+app.post('/api/auth/signup', async (request, response, next) => {
+  const email = typeof request.body?.email === 'string' ? request.body.email.trim().toLowerCase() : ''
+  const password = typeof request.body?.password === 'string' ? request.body.password : ''
+  const name = typeof request.body?.name === 'string' ? request.body.name.trim() : ''
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) return response.status(400).json({ error: 'Enter a valid email.' })
+  if (password.length < 8) return response.status(400).json({ error: 'Password must be at least 8 characters.' })
+  if (!name) return response.status(400).json({ error: 'Enter your name.' })
+
+  try {
+    if (await users.findByEmail(pool, email)) {
+      return response.status(409).json({ error: 'An account with that email already exists.' })
+    }
+    const passwordHash = await hashPassword(password)
+    const user = await users.create(pool, { email, passwordHash, name })
+    response.status(201).json({ token: signToken(user.id), user: { id: user.id, email: user.email, name: user.name } })
+  } catch (error) {
+    if (error.code === '23505') return response.status(409).json({ error: 'An account with that email already exists.' })
+    next(error)
+  }
+})
+
+app.post('/api/auth/login', async (request, response, next) => {
+  const email = typeof request.body?.email === 'string' ? request.body.email.trim().toLowerCase() : ''
+  const password = typeof request.body?.password === 'string' ? request.body.password : ''
+
+  try {
+    const user = await users.findByEmail(pool, email)
+    const valid = user && (await checkPassword(password, user.password_hash))
+    if (!valid) return response.status(401).json({ error: 'Wrong email or password.' })
+
+    response.json({ token: signToken(user.id), user: { id: user.id, email: user.email, name: user.name } })
+  } catch (error) {
+    next(error)
+  }
+})
+
 app.use((request, response) => {
   response.status(404).json({ error: 'No such route' })
 })
 
-// The detail goes in your logs; the visitor gets a plain message. Sending a
-// stack trace to a stranger tells them about your file layout and dependencies.
 app.use((error, request, response, next) => {
   console.error(error)
   response.status(500).json({ error: 'Something went wrong on the server' })
 })
 
-// The host chooses the port and tells you through PORT. Hardcoding 3000 is the
-// commonest reason a first deploy is marked unhealthy and killed.
 const port = process.env.PORT || 3000
 
 app.listen(port, () => {

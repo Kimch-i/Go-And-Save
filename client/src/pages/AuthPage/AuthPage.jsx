@@ -12,6 +12,8 @@ import { plannerLinkForTrip } from '../../lib/tripLink.js';
 import { plural } from '../../lib/format.js';
 import styles from './AuthPage.module.css';
 
+import { listTrips, createTrip, signUp, logIn as apiLogIn } from '../../api/index.js';
+
 function validate(mode, name, email, password) {
   const errors = {};
   if (mode === 'signup' && !name.trim()) errors.name = 'Enter your name.';
@@ -34,6 +36,8 @@ export default function AuthPage({ session, vehicles, onLogIn }) {
   const [showForgotNote, setShowForgotNote] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [tripCount, setTripCount] = useState(0);
+
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     listTrips().then((trips) => setTripCount(trips.length)).catch(() => {});
@@ -61,22 +65,29 @@ export default function AuthPage({ session, vehicles, onLogIn }) {
       return;
     }
 
-    const displayName = isSignup ? name.trim() : email.split('@')[0];
-    setLeaving(true);
-    onLogIn(displayName, email.trim());
+    setFormError('');
+    try {
+      const { token, user } = isSignup
+        ? await signUp({ name: name.trim(), email: email.trim(), password })
+        : await apiLogIn({ email: email.trim(), password });
 
-    // save the trip they tried to save while logged out, then go back to it
-    const pending = storage.takePendingTrip();
-    if (pending) {
-      try {
-        await createTrip(pending);
-        navigate(plannerLinkForTrip(pending, { saved: '1' }));
-      } catch {
-        navigate(plannerLinkForTrip(pending));
+      setLeaving(true);
+      onLogIn(user.name, user.email, token);
+
+      const pending = storage.takePendingTrip();
+      if (pending) {
+        try {
+          await createTrip(pending);
+          navigate(plannerLinkForTrip(pending, { saved: '1' }));
+        } catch {
+          navigate(plannerLinkForTrip(pending));
+        }
+        return;
       }
-      return;
+      navigate('/');
+    } catch (error) {
+      setFormError(error.message);
     }
-    navigate('/');
   }
 
   const vehicleCount = vehicles.length;
@@ -139,6 +150,8 @@ export default function AuthPage({ session, vehicles, onLogIn }) {
             </>
           )}
 
+          {formError && <p className={`${styles.notice} small`} role="alert">{formError}</p>}
+          
           <Button type="submit">{isSignup ? 'Create account' : 'Log in'}</Button>
 
           {isSignup && <p className={styles.notice}>{migrateText}</p>}

@@ -72,6 +72,12 @@ export default function App() {
     storage.clearSession();
   }
 
+  function logIn(name, email, token) {
+  const next = { name, email, token: token ?? session?.token ?? null };
+  setSession(next);
+  storage.saveSession(next);
+}
+
   async function deleteAccount() {
     await deleteAccountData();
     storage.clearAll();

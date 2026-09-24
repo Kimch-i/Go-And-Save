@@ -1,11 +1,19 @@
 // Calls the GAS Express API. Routes the server must provide:
 //   GET /api/places?q=  GET /api/route?from=&to=  GET /api/prices  GET /api/cars?q=
 //   GET+POST /api/vehicles  DELETE /api/vehicles/:id  GET+POST /api/trips  DELETE /api/account
+
+import * as storage from '../services/storage.js';
+
 const BASE = import.meta.env.VITE_API_BASE_URL || '';
 
+
 async function request(path, options) {
+  const token = storage.getSession()?.token;
   const response = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   });
 
@@ -49,3 +57,10 @@ export const createTrip = (input) =>
   request('/api/trips', { method: 'POST', body: JSON.stringify(input) });
 
 export const deleteAccountData = () => request('/api/account', { method: 'DELETE' });
+
+
+export const signUp = (input) =>
+  request('/api/auth/signup', { method: 'POST', body: JSON.stringify(input) });
+
+export const logIn = (input) =>
+  request('/api/auth/login', { method: 'POST', body: JSON.stringify(input) });
