@@ -3,6 +3,7 @@ import cors from 'cors'
 import { pool } from './db/pool.js'
 import * as carModels from './db/carModelsRepo.js'
 import * as fuelPrices from './db/fuelPricesRepo.js'
+import { searchPlaces } from './nominatim.js'
 
 const app = express()
 
@@ -51,6 +52,18 @@ app.get('/api/cars', async (request, response, next) => {
     response.json(q ? await carModels.search(pool, q) : [])
   } catch (error) {
     next(error)
+  }
+})
+
+app.get('/api/places', async (request, response, next) => {
+  const q = typeof request.query.q === 'string' ? request.query.q.trim() : ''
+  if (!q) return response.json([])
+
+  try {
+    response.json(await searchPlaces(q))
+  } catch (error) {
+    console.error('Nominatim search failed:', error.message)
+    response.status(502).json({ error: 'Place search is unavailable right now' })
   }
 })
 
