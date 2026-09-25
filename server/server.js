@@ -7,6 +7,9 @@ import { searchPlaces } from './nominatim.js'
 import { getRoute } from './tomtom.js'
 import * as users from './db/usersRepo.js'
 import { hashPassword, checkPassword, signToken } from './auth.js'
+import * as vehicles from './db/vehiclesRepo.js'
+import * as trips from './db/tripsRepo.js'
+import { requireAuth } from './auth.js'
 
 const app = express()
 
@@ -116,6 +119,50 @@ app.post('/api/auth/login', async (request, response, next) => {
     if (!valid) return response.status(401).json({ error: 'Wrong email or password.' })
 
     response.json({ token: signToken(user.id), user: { id: user.id, email: user.email, name: user.name } })
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.get('/api/vehicles', requireAuth, async (request, response, next) => {
+  try {
+    response.json(await vehicles.listForUser(pool, request.userId))
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.post('/api/vehicles', requireAuth, async (request, response, next) => {
+  try {
+    const vehicle = await vehicles.create(pool, request.userId, request.body ?? {})
+    response.status(201).json(vehicle)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.delete('/api/vehicles/:id', requireAuth, async (request, response, next) => {
+  try {
+    const removed = await vehicles.remove(pool, request.userId, request.params.id)
+    if (!removed) return response.status(404).json({ error: 'Not found' })
+    response.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.get('/api/trips', requireAuth, async (request, response, next) => {
+  try {
+    response.json(await trips.listForUser(pool, request.userId))
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.post('/api/trips', requireAuth, async (request, response, next) => {
+  try {
+    const trip = await trips.create(pool, request.userId, request.body ?? {})
+    response.status(201).json(trip)
   } catch (error) {
     next(error)
   }

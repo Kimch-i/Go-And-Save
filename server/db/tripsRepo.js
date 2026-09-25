@@ -6,6 +6,7 @@ export async function listForUser(pool, userId) {
   return result.rows
 }
 
+// Save a new trip to the database
 export async function create(pool, userId, trip) {
   const result = await pool.query(
     `INSERT INTO trips
