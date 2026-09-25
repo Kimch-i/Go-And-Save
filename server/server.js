@@ -168,6 +168,15 @@ app.post('/api/trips', requireAuth, async (request, response, next) => {
   }
 })
 
+app.delete('/api/account', requireAuth, async (request, response, next) => {
+  try {
+    await users.remove(pool, request.userId)
+    response.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
 app.use((request, response) => {
   response.status(404).json({ error: 'No such route' })
 })
