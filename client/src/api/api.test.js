@@ -16,7 +16,11 @@ describe('api layer', () => {
     }
   });
 
-  it('uses the simulated backend when VITE_USE_MOCK_API is not set', () => {
-    expect(api.USING_MOCK_API).toBe(true);
+  // Tests the rule itself, so the result does not depend on your own .env file.
+  it('uses the simulated backend unless VITE_USE_MOCK_API is exactly "false"', () => {
+    expect(api.isMockMode(undefined)).toBe(true);
+    expect(api.isMockMode('true')).toBe(true);
+    expect(api.isMockMode('False')).toBe(true);
+    expect(api.isMockMode('false')).toBe(false);
   });
 });

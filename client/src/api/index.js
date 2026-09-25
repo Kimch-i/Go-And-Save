@@ -3,7 +3,12 @@
 import * as mockApi from './mockApi.js';
 import * as httpApi from './httpApi.js';
 
-export const USING_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
+// Only the exact text "false" turns demo mode off.
+export function isMockMode(value) {
+  return value !== 'false';
+}
+
+export const USING_MOCK_API = isMockMode(import.meta.env.VITE_USE_MOCK_API);
 
 const implementation = USING_MOCK_API ? mockApi : httpApi;
 
@@ -20,4 +25,6 @@ export const {
   deleteAccountData,
   signUp,
   logIn,
+  updateAccount,
+  migrateGuestVehicles,
 } = implementation;

@@ -175,3 +175,12 @@ export async function logIn({ email }) {
   await delay();
   return { token: 'demo-token', user: { id: 1, name: email.split('@')[0], email } };
 }
+export async function updateAccount({ name, email }) {
+  await delay();
+  return { id: 1, name, email };
+}
+
+// Demo mode keeps every car in one browser list already, so there is nothing to move.
+export async function migrateGuestVehicles() {
+  return {};
+}

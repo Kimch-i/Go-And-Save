@@ -1,6 +1,11 @@
 // Get route and traffic information from TomTom.
 const TOMTOM_URL = 'https://api.tomtom.com/routing/1/calculateRoute'
 
+// Not fatal: prices, cars and accounts still work. Only route lookups fail.
+if (!process.env.TOMTOM_API_KEY) {
+  console.warn('TOMTOM_API_KEY is not set, so every route lookup will fail.')
+}
+
 // Convert a location into TomTom's coordinate format.
 function toPoint(place) {
   return `${place.lat},${place.lon}`

@@ -1,9 +1,11 @@
-// What stays in the browser: theme, preferences, a trip held during login, and the stand-in session.
+// What stays in the browser: theme, preferences, the login session, a trip held
+// during login, and the cars a guest saves before they have an account.
 const KEYS = {
   session: 'gas.session',
   prefs: 'gas.prefs',
   pendingTrip: 'gas.pendingTrip',
   theme: 'gas.theme',
+  guestVehicles: 'gas.guestVehicles',
 };
 
 const DEFAULT_PREFS = {
@@ -12,25 +14,31 @@ const DEFAULT_PREFS = {
   home: { label: 'Porac, Pampanga', lat: 15.0719, lon: 120.5420 },
 };
 
-function read(key, fallback) {
+// localStorage survives closing the browser; sessionStorage is wiped when the
+// tab closes. "Remember me" picks between them for the login session.
+function area(name) {
+  return name === 'session' ? sessionStorage : localStorage;
+}
+
+function read(key, fallback, where = 'local') {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = area(where).getItem(key);
     return raw ? JSON.parse(raw) : fallback;
   } catch (error) {
     return fallback;
   }
 }
 
-function write(key, value) {
+function write(key, value, where = 'local') {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    area(where).setItem(key, JSON.stringify(value));
   } catch (error) {
   }
 }
 
-function remove(key) {
+function remove(key, where = 'local') {
   try {
-    localStorage.removeItem(key);
+    area(where).removeItem(key);
   } catch (error) {
   }
 }
@@ -46,15 +54,33 @@ export function takePendingTrip() {
 }
 
 export function getSession() {
-  return read(KEYS.session, null);
+  return read(KEYS.session, null) || read(KEYS.session, null, 'session');
 }
 
-export function saveSession(session) {
-  write(KEYS.session, session);
+export function saveSession(session, remember = true) {
+  clearSession();
+  write(KEYS.session, session, remember ? 'local' : 'session');
+}
+
+// Change the name or email without moving the session to the other storage.
+export function updateSession(changes) {
+  const current = getSession();
+  if (!current) return;
+  const remembered = read(KEYS.session, null) !== null;
+  saveSession({ ...current, ...changes }, remembered);
 }
 
 export function clearSession() {
   remove(KEYS.session);
+  remove(KEYS.session, 'session');
+}
+
+export function getGuestVehicles() {
+  return read(KEYS.guestVehicles, []);
+}
+
+export function saveGuestVehicles(vehicles) {
+  write(KEYS.guestVehicles, vehicles);
 }
 
 export function getPrefs() {
@@ -81,5 +107,6 @@ export function saveThemeChoice(choice) {
 }
 
 export function clearAll() {
-  [KEYS.session, KEYS.prefs, KEYS.pendingTrip].forEach(remove);
+  clearSession();
+  [KEYS.prefs, KEYS.pendingTrip, KEYS.guestVehicles].forEach((key) => remove(key));
 }

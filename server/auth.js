@@ -3,6 +3,16 @@ import jwt from 'jsonwebtoken'
 
 const TOKEN_EXPIRY = '7d'
 
+// Same idea as DATABASE_URL in db/pool.js: without a secret no token can be
+// signed, so stop at boot with a clear message instead of failing every login.
+if (!process.env.JWT_SECRET) {
+  console.error(
+    'JWT_SECRET is not set. Locally: add it to server/.env. ' +
+    'On a host: add it in the dashboard, then redeploy.'
+  )
+  process.exit(1)
+}
+
 export async function hashPassword(password) {
   return bcrypt.hash(password, 10)
 }

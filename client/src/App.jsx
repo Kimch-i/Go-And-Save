@@ -11,7 +11,10 @@ import TripsPage from './pages/TripsPage/TripsPage.jsx';
 import AuthPage from './pages/AuthPage/AuthPage.jsx';
 import ProfilePage from './pages/ProfilePage/ProfilePage.jsx';
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage.jsx';
-import { listFuelPrices, listVehicles, createVehicle, deleteVehicle, deleteAccountData } from './api/index.js';
+import {
+  listFuelPrices, listVehicles, createVehicle, deleteVehicle, deleteAccountData,
+  updateAccount, migrateGuestVehicles,
+} from './api/index.js';
 import * as storage from './services/storage.js';
 import { applyTheme } from './lib/theme.js';
 
@@ -23,12 +26,31 @@ export default function App() {
   const [themeChoice, setThemeChoice] = useState(storage.getThemeChoice);
   const [theme, setTheme] = useState(() => applyTheme(storage.getThemeChoice()));
 
+  const token = session?.token;
+
+  // Runs on load and again whenever someone logs in or out, so the list always
+  // belongs to whoever is using the app: a guest's cars in this browser, or the
+  // account's cars from the server. finally() ends the spinner even on an error.
   useEffect(() => {
-    listVehicles().then((list) => {
-      setVehicles(list);
-      setVehiclesLoading(false);
-    });
-    listFuelPrices().then(setFuelPrices);
+    setVehiclesLoading(true);
+    listVehicles()
+      .then(setVehicles)
+      .catch((error) => {
+        console.error('Could not load vehicles:', error.message);
+        setVehicles([]);
+      })
+      .finally(() => setVehiclesLoading(false));
+  }, [token]);
+
+  useEffect(() => {
+    listFuelPrices().then(setFuelPrices).catch(() => setFuelPrices([]));
+  }, []);
+
+  // httpApi.js sends this when the server rejects an expired token.
+  useEffect(() => {
+    const handleLoggedOut = () => setSession(null);
+    window.addEventListener('gas:logged-out', handleLoggedOut);
+    return () => window.removeEventListener('gas:logged-out', handleLoggedOut);
   }, []);
 
   function changeTheme(choice) {
@@ -61,22 +83,32 @@ export default function App() {
     });
   }
 
-  function logIn(name, email) {
-    const next = { name, email };
-    setSession(next);
-    storage.saveSession(next);
+  // Save the token first, because moving the guest's cars needs it. Only then
+  // update state, so the vehicle list reloads after the cars have moved.
+  // Returns the old-id to new-id map for a trip held during login.
+  async function logIn(user, newToken, remember) {
+    storage.saveSession({ name: user.name, email: user.email, token: newToken }, remember);
+    let idMap = {};
+    try {
+      idMap = await migrateGuestVehicles();
+    } catch (error) {
+      // The cars stay in the browser and move on the next login instead.
+      console.error('Could not move guest vehicles:', error.message);
+    }
+    setSession(storage.getSession());
+    return idMap;
+  }
+
+  async function changeAccount(name, email) {
+    const user = await updateAccount({ name, email });
+    storage.updateSession({ name: user.name, email: user.email });
+    setSession(storage.getSession());
   }
 
   function logOut() {
-    setSession(null);
     storage.clearSession();
+    setSession(null);
   }
-
-  function logIn(name, email, token) {
-  const next = { name, email, token: token ?? session?.token ?? null };
-  setSession(next);
-  storage.saveSession(next);
-}
 
   async function deleteAccount() {
     await deleteAccountData();
@@ -118,7 +150,7 @@ export default function App() {
                 vehicles={vehicles}
                 themeChoice={themeChoice}
                 onThemeChange={changeTheme}
-                onUpdateAccount={logIn}
+                onUpdateAccount={changeAccount}
                 onLogOut={logOut}
                 onDeleteAccount={deleteAccount}
               />

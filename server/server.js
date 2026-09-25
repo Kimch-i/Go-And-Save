@@ -10,6 +10,7 @@ import { searchPlaces } from './nominatim.js'
 import { getRoute } from './tomtom.js'
 import { hashPassword, checkPassword, signToken, requireAuth } from './auth.js'
 import { camelCaseRow, camelCaseRows } from './caseConvert.js'
+import { vehicleErrors, tripErrors, accountErrors } from './validate.js'
 
 const app = express()
 
@@ -150,8 +151,13 @@ app.get('/api/vehicles', requireAuth, async (request, response, next) => {
 })
 
 app.post('/api/vehicles', requireAuth, async (request, response, next) => {
+  const body = request.body ?? {}
+  const errors = vehicleErrors(body)
+  if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
+
   try {
-    const vehicle = await vehicles.create(pool, request.userId, request.body ?? {})
+    const vehicle = await vehicles.create(pool, request.userId, body)
+    if (!vehicle) return response.status(400).json({ error: 'That car is not in the catalog.' })
     response.status(201).json(camelCaseRow(vehicle))
   } catch (error) {
     next(error)
@@ -159,6 +165,9 @@ app.post('/api/vehicles', requireAuth, async (request, response, next) => {
 })
 
 app.delete('/api/vehicles/:id', requireAuth, async (request, response, next) => {
+  // "abc" is not an id Postgres can compare, so answer before asking it.
+  if (!/^\d+$/.test(request.params.id)) return response.status(404).json({ error: 'Not found' })
+
   try {
     const removed = await vehicles.remove(pool, request.userId, request.params.id)
     if (!removed) return response.status(404).json({ error: 'Not found' })
@@ -177,10 +186,33 @@ app.get('/api/trips', requireAuth, async (request, response, next) => {
 })
 
 app.post('/api/trips', requireAuth, async (request, response, next) => {
+  const body = request.body ?? {}
+  const errors = tripErrors(body)
+  if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
+
   try {
-    const trip = await trips.create(pool, request.userId, request.body ?? {})
+    const trip = await trips.create(pool, request.userId, body)
     response.status(201).json(camelCaseRow(trip))
   } catch (error) {
+    next(error)
+  }
+})
+
+// Change the name or email on the account.
+app.put('/api/account', requireAuth, async (request, response, next) => {
+  const body = request.body ?? {}
+  const errors = accountErrors(body)
+  if (errors.length > 0) return response.status(400).json({ error: errors.join(' ') })
+
+  try {
+    const user = await users.update(pool, request.userId, {
+      name: body.name.trim(),
+      email: body.email.trim().toLowerCase(),
+    })
+    if (!user) return response.status(401).json({ error: 'Your account no longer exists. Log in again.' })
+    response.json(user)
+  } catch (error) {
+    if (error.code === '23505') return response.status(409).json({ error: 'An account with that email already exists.' })
     next(error)
   }
 })
@@ -203,6 +235,13 @@ app.use((request, response) => {
 // The detail goes in your logs; the visitor gets a plain message. Sending a
 // stack trace to a stranger tells them about your file layout and dependencies.
 app.use((error, request, response, next) => {
+  // A token can outlive its account: it stays valid for 7 days even after the
+  // account is deleted. Saving then breaks the user_id foreign key. That is a
+  // login problem, not a server fault, so say so.
+  if (error.code === '23503' && error.constraint?.endsWith('_user_id_fkey')) {
+    return response.status(401).json({ error: 'Your account no longer exists. Log in again.' })
+  }
+
   console.error(error)
   response.status(500).json({ error: 'Something went wrong on the server' })
 })

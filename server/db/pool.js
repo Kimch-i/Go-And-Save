@@ -1,10 +1,16 @@
 import pg from 'pg'
 
+// How Postgres values become JavaScript values.
+// NUMERIC (type 1700) arrives as a string by default. This app needs real
+// numbers for the estimate maths and .toFixed() in the UI.
+pg.types.setTypeParser(1700, (value) => parseFloat(value))
+// DATE (type 1082) arrives as a Date at local midnight, which JSON turns into
+// the previous day in UTC. Keep it as the plain "2026-08-24" text instead.
+pg.types.setTypeParser(1082, (value) => value)
+
 // Fail at boot with one clear line, rather than with a mystery 500 an hour
 // later. The commonest deployment mistake is setting a variable in .env on your
 // laptop and never setting it in the host's dashboard.
-
-pg.types.setTypeParser(1700, (value) => parseFloat(value))
 if (!process.env.DATABASE_URL) {
   console.error(
     'DATABASE_URL is not set. Locally: copy .env.example to .env and fill it in. ' +
