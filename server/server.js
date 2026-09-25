@@ -3,16 +3,22 @@ import cors from 'cors'
 import { pool } from './db/pool.js'
 import * as carModels from './db/carModelsRepo.js'
 import * as fuelPrices from './db/fuelPricesRepo.js'
-import { searchPlaces } from './nominatim.js'
-import { getRoute } from './tomtom.js'
 import * as users from './db/usersRepo.js'
-import { hashPassword, checkPassword, signToken } from './auth.js'
 import * as vehicles from './db/vehiclesRepo.js'
 import * as trips from './db/tripsRepo.js'
-import { requireAuth } from './auth.js'
+import { searchPlaces } from './nominatim.js'
+import { getRoute } from './tomtom.js'
+import { hashPassword, checkPassword, signToken, requireAuth } from './auth.js'
+import { camelCaseRow, camelCaseRows } from './caseConvert.js'
 
 const app = express()
 
+// CORS before the routes. Middleware registered after a route never sees that
+// route's requests.
+//
+// Name your origins. app.use(cors()) with no options sends
+// Access-Control-Allow-Origin: *, which lets any site on the internet call this
+// API from a visitor's browser.
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim())
@@ -21,10 +27,13 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
 app.use(cors({ origin: allowedOrigins }))
 app.use(express.json({ limit: '100kb' }))
 
+// Is the process alive?
 app.get('/healthz', (request, response) => {
   response.json({ ok: true })
 })
 
+// Is the database reachable? A different question, and the one that tells you
+// in two seconds which half of a problem you have.
 app.get('/readyz', async (request, response) => {
   try {
     await pool.query('SELECT 1')
@@ -35,9 +44,11 @@ app.get('/readyz', async (request, response) => {
   }
 })
 
+// Rows come out of Postgres in snake_case; the client expects camelCase, so
+// every route that returns real database rows converts at this boundary.
 app.get('/api/prices', async (request, response, next) => {
   try {
-    response.json(await fuelPrices.getAll(pool))
+    response.json(camelCaseRows(await fuelPrices.getAll(pool)))
   } catch (error) {
     next(error)
   }
@@ -46,12 +57,14 @@ app.get('/api/prices', async (request, response, next) => {
 app.get('/api/cars', async (request, response, next) => {
   try {
     const q = typeof request.query.q === 'string' ? request.query.q.trim() : ''
-    response.json(q ? await carModels.search(pool, q) : [])
+    response.json(q ? camelCaseRows(await carModels.search(pool, q)) : [])
   } catch (error) {
     next(error)
   }
 })
 
+// Nominatim and TomTom already hand-build camelCase objects, so these two need
+// no conversion.
 app.get('/api/places', async (request, response, next) => {
   const q = typeof request.query.q === 'string' ? request.query.q.trim() : ''
   if (!q) return response.json([])
@@ -104,6 +117,8 @@ app.post('/api/auth/signup', async (request, response, next) => {
     const user = await users.create(pool, { email, passwordHash, name })
     response.status(201).json({ token: signToken(user.id), user: { id: user.id, email: user.email, name: user.name } })
   } catch (error) {
+    // Two signups for the same email landing at once race past the check
+    // above; the database's UNIQUE constraint is the real guard.
     if (error.code === '23505') return response.status(409).json({ error: 'An account with that email already exists.' })
     next(error)
   }
@@ -124,9 +139,11 @@ app.post('/api/auth/login', async (request, response, next) => {
   }
 })
 
+// requireAuth runs before each handler below. A missing or expired token gets
+// a 401 and the handler never runs.
 app.get('/api/vehicles', requireAuth, async (request, response, next) => {
   try {
-    response.json(await vehicles.listForUser(pool, request.userId))
+    response.json(camelCaseRows(await vehicles.listForUser(pool, request.userId)))
   } catch (error) {
     next(error)
   }
@@ -135,7 +152,7 @@ app.get('/api/vehicles', requireAuth, async (request, response, next) => {
 app.post('/api/vehicles', requireAuth, async (request, response, next) => {
   try {
     const vehicle = await vehicles.create(pool, request.userId, request.body ?? {})
-    response.status(201).json(vehicle)
+    response.status(201).json(camelCaseRow(vehicle))
   } catch (error) {
     next(error)
   }
@@ -153,7 +170,7 @@ app.delete('/api/vehicles/:id', requireAuth, async (request, response, next) => 
 
 app.get('/api/trips', requireAuth, async (request, response, next) => {
   try {
-    response.json(await trips.listForUser(pool, request.userId))
+    response.json(camelCaseRows(await trips.listForUser(pool, request.userId)))
   } catch (error) {
     next(error)
   }
@@ -162,12 +179,14 @@ app.get('/api/trips', requireAuth, async (request, response, next) => {
 app.post('/api/trips', requireAuth, async (request, response, next) => {
   try {
     const trip = await trips.create(pool, request.userId, request.body ?? {})
-    response.status(201).json(trip)
+    response.status(201).json(camelCaseRow(trip))
   } catch (error) {
     next(error)
   }
 })
 
+// Deleting the user cascades to their vehicles and trips, because both
+// foreign keys are ON DELETE CASCADE in schema.sql.
 app.delete('/api/account', requireAuth, async (request, response, next) => {
   try {
     await users.remove(pool, request.userId)
@@ -181,11 +200,15 @@ app.use((request, response) => {
   response.status(404).json({ error: 'No such route' })
 })
 
+// The detail goes in your logs; the visitor gets a plain message. Sending a
+// stack trace to a stranger tells them about your file layout and dependencies.
 app.use((error, request, response, next) => {
   console.error(error)
   response.status(500).json({ error: 'Something went wrong on the server' })
 })
 
+// The host chooses the port and tells you through PORT. Hardcoding 3000 is the
+// commonest reason a first deploy is marked unhealthy and killed.
 const port = process.env.PORT || 3000
 
 app.listen(port, () => {

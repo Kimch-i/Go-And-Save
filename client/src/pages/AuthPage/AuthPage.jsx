@@ -7,7 +7,6 @@ import Button from '../../components/atoms/Button/Button.jsx';
 import Footer from '../../components/organisms/Footer/Footer.jsx';
 import DemoNotice from '../../components/molecules/DemoNotice/DemoNotice.jsx';
 import * as storage from '../../services/storage.js';
-import { listTrips, createTrip } from '../../api/index.js';
 import { plannerLinkForTrip } from '../../lib/tripLink.js';
 import { plural } from '../../lib/format.js';
 import styles from './AuthPage.module.css';
