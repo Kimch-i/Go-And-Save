@@ -40,11 +40,6 @@ function extractPrice(html, label) {
   return match ? Number(match[1]) : null
 }
 
-function extractDate(html) {
-  const match = html.match(/Updated:\s*(\d{4}-\d{2}-\d{2})/i)
-  return match ? match[1] : null
-}
-
 async function main() {
   const response = await fetch(SOURCE_URL, {
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; GAS-price-check/1.0)' },
@@ -54,7 +49,11 @@ async function main() {
 
   const gasoline = extractPrice(html, 'Gasoline')
   const diesel = extractPrice(html, 'Diesel')
-  const weekOf = extractDate(html)
+  // The date on the source page turned out not to match a fixed format we
+  // could rely on, and its exact wording can change without the price
+  // reporting itself changing. We know when THIS check ran, so use that
+  // instead of trying to scrape a date off the page.
+  const weekOf = new Date().toISOString().slice(0, 10)
 
   if (!Number.isFinite(gasoline) || gasoline < MIN_PLAUSIBLE || gasoline > MAX_PLAUSIBLE) {
     fail(`gasoline price missing or implausible (got ${gasoline})`)
@@ -62,9 +61,8 @@ async function main() {
   if (!Number.isFinite(diesel) || diesel < MIN_PLAUSIBLE || diesel > MAX_PLAUSIBLE) {
     fail(`diesel price missing or implausible (got ${diesel})`)
   }
-  if (!weekOf) fail('could not find an "Updated: YYYY-MM-DD" date on the page')
 
-  console.log(`Parsed: gasoline ₱${gasoline}/L, diesel ₱${diesel}/L, dated ${weekOf}`)
+  console.log(`Parsed: gasoline ₱${gasoline}/L, diesel ₱${diesel}/L, run on ${weekOf}`)
 
   const sqlUpdated = updateSeedSql(weekOf, gasoline, diesel)
   const jsonUpdated = updateSeedJson(weekOf, gasoline, diesel)
