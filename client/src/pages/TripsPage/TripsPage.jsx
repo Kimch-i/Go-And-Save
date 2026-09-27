@@ -5,7 +5,7 @@ import TripBarChart from '../../components/organisms/TripBarChart/TripBarChart.j
 import EmptyState from '../../components/molecules/EmptyState/EmptyState.jsx';
 import Spinner from '../../components/atoms/Spinner/Spinner.jsx';
 import { listTrips } from '../../api/index.js';
-import { formatPeso, formatPesoRounded, formatWeek } from '../../lib/format.js';
+import { formatPesoRounded, formatWeek } from '../../lib/format.js';
 import styles from './TripsPage.module.css';
 
 function isThisMonth(isoDate) {
@@ -73,6 +73,7 @@ export default function TripsPage({ vehicles, session }) {
   const thisMonth = trips.filter((trip) => isThisMonth(trip.createdAt));
   const spent = thisMonth.reduce((sum, trip) => sum + trip.actualCost, 0);
   const lost = thisMonth.reduce((sum, trip) => sum + (trip.actualCost - trip.idealCost), 0);
+  const distance = thisMonth.reduce((sum, trip) => sum + trip.distanceKm, 0);
   const monthName = new Date().toLocaleDateString('en-US', { month: 'long' });
 
   const byDay = groupByDay(trips);
@@ -95,6 +96,10 @@ export default function TripsPage({ vehicles, session }) {
         <div>
           <p className="small muted">Lost to traffic</p>
           <p className={`${styles.value} ${styles.lost} num`}>{formatPesoRounded(lost)}</p>
+        </div>
+        <div>
+          <p className="small muted">Distance in {monthName}</p>
+          <p className={`${styles.value} num`}>{Math.round(distance).toLocaleString('en-PH')} km</p>
         </div>
       </div>
 
