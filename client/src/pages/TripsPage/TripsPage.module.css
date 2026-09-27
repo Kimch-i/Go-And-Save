@@ -21,3 +21,21 @@
 .guestNote {
   margin-top: var(--space-3);
 }
+
+.charts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .charts {
+    flex-direction: row;
+  }
+
+  .charts > div {
+    flex: 1;
+    min-width: 0;
+  }
+}

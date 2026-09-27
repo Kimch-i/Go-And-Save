@@ -1,16 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import TripTable from '../../components/organisms/TripTable/TripTable.jsx';
+import TripBarChart from '../../components/organisms/TripBarChart/TripBarChart.jsx';
 import EmptyState from '../../components/molecules/EmptyState/EmptyState.jsx';
 import Spinner from '../../components/atoms/Spinner/Spinner.jsx';
 import { listTrips } from '../../api/index.js';
-import { formatPesoRounded } from '../../lib/format.js';
+import { formatPeso, formatPesoRounded, formatWeek } from '../../lib/format.js';
 import styles from './TripsPage.module.css';
 
 function isThisMonth(isoDate) {
   const date = new Date(isoDate);
   const now = new Date();
   return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+}
+
+// One row per calendar day a trip was saved, most recent last, capped to the
+// most recent 10 days so the chart stays readable once trips add up.
+function groupByDay(trips) {
+  const byDay = new Map();
+  for (const trip of trips) {
+    const day = trip.createdAt.slice(0, 10);
+    const entry = byDay.get(day) ?? { day, cost: 0, km: 0 };
+    entry.cost += trip.actualCost;
+    entry.km += trip.distanceKm;
+    byDay.set(day, entry);
+  }
+  return [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day)).slice(-10);
 }
 
 // Saved trips, this month's totals, and how much was lost to traffic.
@@ -60,6 +75,10 @@ export default function TripsPage({ vehicles, session }) {
   const lost = thisMonth.reduce((sum, trip) => sum + (trip.actualCost - trip.idealCost), 0);
   const monthName = new Date().toLocaleDateString('en-US', { month: 'long' });
 
+  const byDay = groupByDay(trips);
+  const costSeries = byDay.map((row) => ({ label: formatWeek(row.day), value: row.cost }));
+  const kmSeries = byDay.map((row) => ({ label: formatWeek(row.day), value: row.km }));
+
   return (
     <>
       <h1>Saved trips</h1>
@@ -78,6 +97,28 @@ export default function TripsPage({ vehicles, session }) {
           <p className={`${styles.value} ${styles.lost} num`}>{formatPesoRounded(lost)}</p>
         </div>
       </div>
+
+      {byDay.length >= 2 && (
+        <div className={styles.charts}>
+          <div>
+            <p className="small muted">Fuel spend by day</p>
+            <TripBarChart
+              data={costSeries}
+              valueFormatter={formatPesoRounded}
+              ariaLabel={`Fuel spend per day over the last ${byDay.length} days with a saved trip, in pesos`}
+            />
+          </div>
+          <div>
+            <p className="small muted">Distance driven by day</p>
+            <TripBarChart
+              data={kmSeries}
+              color="var(--text-muted)"
+              valueFormatter={(km) => `${Math.round(km)} km`}
+              ariaLabel={`Distance driven per day over the last ${byDay.length} days with a saved trip, in kilometres`}
+            />
+          </div>
+        </div>
+      )}
 
       <TripTable trips={trips} vehicles={vehicles} />
 
