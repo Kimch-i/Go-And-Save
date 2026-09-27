@@ -1,0 +1,57 @@
+name: Check fuel prices
+
+# Runs itself weekly. Fetches one public price page, sanity-checks the
+# numbers, and if there's a real change, opens a pull request for a human to
+# review and merge -- it never merges or deploys anything on its own.
+#
+# Merging the PR only updates seed.sql / seed.json in the repo. It does NOT
+# touch the live database -- re-run the seed against Postgres after merging
+# if you want the deployed app to show the new prices.
+
+on:
+  schedule:
+    # Mondays, 01:00 UTC (~09:00 Manila time). DOE/oil companies typically
+    # adjust prices weekly, sometimes twice during a crisis -- this is not
+    # meant to catch same-week revisions, only the usual weekly change.
+    - cron: '0 1 * * 1'
+  workflow_dispatch: {} # lets you trigger a run by hand from the Actions tab, to test it
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch and validate this week's prices
+        id: prices
+        run: node scripts/update-fuel-prices.mjs
+
+      - name: Open a pull request if the price files changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: fuel prices for week of ${{ steps.prices.outputs.week_of }}"
+          branch: fuel-price-update
+          delete-branch: true
+          title: "Update fuel prices for week of ${{ steps.prices.outputs.week_of }}"
+          body: |
+            Auto-fetched by `.github/workflows/update-fuel-prices.yml`.
+
+            - Gasoline: ₱${{ steps.prices.outputs.gasoline }}/L
+            - Diesel: ₱${{ steps.prices.outputs.diesel }}/L
+            - Source: ${{ steps.prices.outputs.source }}
+
+            **Before merging:** open the source link and check these two
+            numbers against it yourself. This bot cannot tell a correct
+            scrape from a page that changed its layout.
+
+            **After merging:** this only updates the files in the repo.
+            Re-run the seed against your Postgres database if you want the
+            deployed app to actually show the new prices.
