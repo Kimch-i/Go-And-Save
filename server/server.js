@@ -1,5 +1,7 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import { pool } from './db/pool.js'
 import * as carModels from './db/carModelsRepo.js'
 import * as fuelPrices from './db/fuelPricesRepo.js'
@@ -25,8 +27,33 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .map((origin) => origin.trim())
   .filter(Boolean)
 
+// crossOriginResourcePolicy defaults to "same-origin", a separate mechanism
+// from CORS above. Left alone, it silently blocks the deployed front end
+// (a different origin from this API) from reading these responses, even
+// though cors() allows it.
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
 app.use(cors({ origin: allowedOrigins }))
 app.use(express.json({ limit: '100kb' }))
+
+// Auth endpoints accept a password: a stricter limit slows down anyone trying
+// to guess one. Keyed by IP, so it doesn't block real users, only a flood.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Try again in a few minutes.' },
+})
+
+// Places and route lookups spend a real, metered call against Nominatim/TomTom
+// on every request. This limit protects that quota, not the user.
+const externalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Try again in a few minutes.' },
+})
 
 // Is the process alive?
 app.get('/healthz', (request, response) => {
@@ -66,7 +93,7 @@ app.get('/api/cars', async (request, response, next) => {
 
 // Nominatim and TomTom already hand-build camelCase objects, so these two need
 // no conversion.
-app.get('/api/places', async (request, response, next) => {
+app.get('/api/places', externalApiLimiter, async (request, response, next) => {
   const q = typeof request.query.q === 'string' ? request.query.q.trim() : ''
   if (!q) return response.json([])
 
@@ -85,7 +112,7 @@ function parseCoords(value) {
   return { lat, lon }
 }
 
-app.get('/api/route', async (request, response) => {
+app.get('/api/route', externalApiLimiter, async (request, response) => {
   const origin = parseCoords(request.query.from)
   const destination = parseCoords(request.query.to)
 
@@ -101,7 +128,7 @@ app.get('/api/route', async (request, response) => {
   }
 })
 
-app.post('/api/auth/signup', async (request, response, next) => {
+app.post('/api/auth/signup', authLimiter, async (request, response, next) => {
   const email = typeof request.body?.email === 'string' ? request.body.email.trim().toLowerCase() : ''
   const password = typeof request.body?.password === 'string' ? request.body.password : ''
   const name = typeof request.body?.name === 'string' ? request.body.name.trim() : ''
@@ -125,7 +152,7 @@ app.post('/api/auth/signup', async (request, response, next) => {
   }
 })
 
-app.post('/api/auth/login', async (request, response, next) => {
+app.post('/api/auth/login', authLimiter, async (request, response, next) => {
   const email = typeof request.body?.email === 'string' ? request.body.email.trim().toLowerCase() : ''
   const password = typeof request.body?.password === 'string' ? request.body.password : ''
 
