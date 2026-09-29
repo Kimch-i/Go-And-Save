@@ -18,7 +18,6 @@ const app = express()
 
 app.set('trust proxy', 1)
 
-
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim())
@@ -28,7 +27,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
 app.use(cors({ origin: allowedOrigins }))
 app.use(express.json({ limit: '100kb' }))
 
-// Auth endpoints accept a password: a stricter limit slows down anyone trying
+// Auth endpoints accept a password: a stricter limit slows down anyone trying to guess one
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
@@ -37,7 +36,7 @@ const authLimiter = rateLimit({
   message: { error: 'Too many attempts. Try again in a few minutes.' },
 })
 
-// Places and route lookups spend a real, metered call against Nominatim/TomTom on every request
+// Places and route lookups spend a real, metered call against Nominatim/TomTom on every request. This limit protects that quota, not the user.
 const externalApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 120,
@@ -61,7 +60,7 @@ app.get('/readyz', async (request, response) => {
   }
 })
 
-// Rows come out of Postgres in snake_case; the client expects camelCase
+// Rows come out of Postgres in snake_case; the client expects camelCase, soevery route that returns real database rows converts at this boundary.
 app.get('/api/prices', async (request, response, next) => {
   try {
     response.json(camelCaseRows(await fuelPrices.getAll(pool)))
@@ -79,7 +78,7 @@ app.get('/api/cars', async (request, response, next) => {
   }
 })
 
-// Nominatim and TomTom already hand-build camelCase objects
+// Nominatim and TomTom already hand-build camelCase objects, so these two need no conversion.
 app.get('/api/places', externalApiLimiter, async (request, response, next) => {
   const q = typeof request.query.q === 'string' ? request.query.q.trim() : ''
   if (!q) return response.json([])
@@ -132,7 +131,7 @@ app.post('/api/auth/signup', authLimiter, async (request, response, next) => {
     const user = await users.create(pool, { email, passwordHash, name })
     response.status(201).json({ token: signToken(user.id), user: { id: user.id, email: user.email, name: user.name } })
   } catch (error) {
-
+    // Two signups for the same email landing at once race past the check above
     if (error.code === '23505') return response.status(409).json({ error: 'An account with that email already exists.' })
     next(error)
   }
@@ -153,7 +152,7 @@ app.post('/api/auth/login', authLimiter, async (request, response, next) => {
   }
 })
 
-// requireAuth runs before each handler below. A missing or expired token gets a 401 and the handler never runs.
+// requireAuth runs before each handler below
 app.get('/api/vehicles', requireAuth, async (request, response, next) => {
   try {
     response.json(camelCaseRows(await vehicles.listForUser(pool, request.userId)))
@@ -229,7 +228,7 @@ app.put('/api/account', requireAuth, async (request, response, next) => {
   }
 })
 
-// Deleting the user cascades to their vehicles and trips, because both foreign keys are ON DELETE CASCADE in schema.sql.
+// Deleting the user cascades to their vehicles and trips
 app.delete('/api/account', requireAuth, async (request, response, next) => {
   try {
     await users.remove(pool, request.userId)
@@ -243,10 +242,9 @@ app.use((request, response) => {
   response.status(404).json({ error: 'No such route' })
 })
 
-// The detail goes in your logs; the visitor gets a plain message. Sending a
-// stack trace to a stranger tells them about your file layout and dependencies.
+// The detail goes in your logs; the visitor gets a plain message
 app.use((error, request, response, next) => {
-  // A token can outlive its account: it stays valid for 7 days even after the account is deleted
+
   if (error.code === '23503' && error.constraint?.endsWith('_user_id_fkey')) {
     return response.status(401).json({ error: 'Your account no longer exists. Log in again.' })
   }
