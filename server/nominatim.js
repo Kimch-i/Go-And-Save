@@ -1,7 +1,18 @@
 // Nominatim is used to search for places in the Philippines
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
 
+let nextAllowedAt = 0
+
+function waitForTurn() {
+  const now = Date.now()
+  const waitMs = Math.max(0, nextAllowedAt - now)
+  nextAllowedAt = Math.max(now, nextAllowedAt) + 1000
+  return new Promise((resolve) => setTimeout(resolve, waitMs))
+}
+
 export async function searchPlaces(query) {
+  await waitForTurn()
+
   const url = new URL(NOMINATIM_URL)
   url.searchParams.set('q', query)
   url.searchParams.set('format', 'jsonv2')
