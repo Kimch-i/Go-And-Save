@@ -1,4 +1,4 @@
-# GAS — Gasolina Advisory System
+# GAS — Go And Save
 
 GAS tells a Philippine driver what a trip will cost in fuel before they leave:
 once for clear roads, and once for the traffic happening right now.
