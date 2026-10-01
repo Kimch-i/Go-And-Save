@@ -21,6 +21,16 @@ CREATE TABLE IF NOT EXISTS car_models (
   idle_rate_lph        NUMERIC NOT NULL
 );
 
+-- One row per real car (same make/model/years/fuel can't appear twice).
+-- seed.sql upserts on this instead of wiping the table, so a vehicle a user
+-- has already picked keeps pointing at the same row -- see seed.sql's header
+-- comment for why that matters. year_to is COALESCEd to 0 because two NULLs
+-- are never equal to a unique index or to ON CONFLICT -- without this, every
+-- "still in production" car (year_to left blank) would insert as a fresh
+-- duplicate row on every reseed instead of updating in place.
+CREATE UNIQUE INDEX IF NOT EXISTS car_models_natural_key_idx
+  ON car_models (make, model, year_from, COALESCE(year_to, 0), fuel_type);
+
 -- Fuel prices by fuel type and week
 CREATE TABLE IF NOT EXISTS fuel_prices (
   id              SERIAL PRIMARY KEY,
@@ -28,6 +38,10 @@ CREATE TABLE IF NOT EXISTS fuel_prices (
   price_per_liter NUMERIC NOT NULL,
   week_of         DATE NOT NULL
 );
+
+-- One row per fuel type per week -- same reason as car_models above.
+CREATE UNIQUE INDEX IF NOT EXISTS fuel_prices_natural_key_idx
+  ON fuel_prices (fuel_type, week_of);
 
 -- Vehicles saved by users
 CREATE TABLE IF NOT EXISTS vehicles (

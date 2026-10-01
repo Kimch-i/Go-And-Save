@@ -88,10 +88,17 @@ function updateSeedSql(weekOf, gasoline, diesel) {
   if (!match) fail('could not find the fuel_prices INSERT block in seed.sql')
 
   const block = match[0]
-  const semicolonIndex = block.lastIndexOf(';')
+  // New rows go right before ON CONFLICT, not before the block's final
+  // semicolon -- the VALUES list ends at ON CONFLICT, the semicolon now
+  // closes the DO UPDATE SET clause after it (seed.sql upserts instead of
+  // truncating, see its header comment for why).
+  const conflictIndex = block.indexOf('ON CONFLICT')
+  if (conflictIndex === -1) fail('fuel_prices INSERT is missing its ON CONFLICT clause')
+
   const newBlock =
-    block.slice(0, semicolonIndex) +
-    `,\n  ('gasoline', ${gasoline}, '${weekOf}'),\n  ('diesel', ${diesel}, '${weekOf}');`
+    block.slice(0, conflictIndex).replace(/\n$/, '') +
+    `,\n  ('gasoline', ${gasoline}, '${weekOf}'),\n  ('diesel', ${diesel}, '${weekOf}')\n` +
+    block.slice(conflictIndex)
 
   writeFileSync(seedSqlPath, text.replace(block, newBlock))
   return true

@@ -1,7 +1,3 @@
-
-TRUNCATE TABLE car_models, fuel_prices RESTART IDENTITY CASCADE;
-
--- Car models available in the car catalog.
 INSERT INTO car_models
   (make, model, year_from, year_to, fuel_type, km_per_liter_city,
    km_per_liter_highway, kerb_weight_kg, idle_rate_lph)
@@ -92,10 +88,14 @@ VALUES
 
   -- Yamaha motorcycles
   ('Yamaha', 'Mio Sporty', 2019, 2023, 'gasoline', 42, 47, 98, 0.15),
-  ('Yamaha', 'NMAX', 2020, 2023, 'gasoline', 38, 43, 125, 0.2);
+  ('Yamaha', 'NMAX', 2020, 2023, 'gasoline', 38, 43, 125, 0.2)
+ON CONFLICT (make, model, year_from, COALESCE(year_to, 0), fuel_type) DO UPDATE SET
+  km_per_liter_city    = EXCLUDED.km_per_liter_city,
+  km_per_liter_highway = EXCLUDED.km_per_liter_highway,
+  kerb_weight_kg       = EXCLUDED.kerb_weight_kg,
+  idle_rate_lph        = EXCLUDED.idle_rate_lph;
 
 -- Weekly fuel prices.
-
 INSERT INTO fuel_prices
   (fuel_type, price_per_liter, week_of)
 VALUES
@@ -134,4 +134,6 @@ VALUES
   ('gasoline', 91.25, '2026-09-30'),
   ('diesel', 94.37, '2026-09-30'),
   ('gasoline', 91.39, '2026-10-01'),
-  ('diesel', 94.52, '2026-10-01');
+  ('diesel', 94.52, '2026-10-01')
+ON CONFLICT (fuel_type, week_of) DO UPDATE SET
+  price_per_liter = EXCLUDED.price_per_liter;
