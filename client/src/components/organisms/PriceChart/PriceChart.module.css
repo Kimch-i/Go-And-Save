@@ -8,10 +8,26 @@
 
 .box svg {
   display: block;
+  /* Let a vertical swipe still scroll the page; only left-right drag is
+     treated as scrubbing the chart. */
+  touch-action: pan-y;
 }
 
 .axis {
   fill: var(--text-muted);
   font-size: 11px;
+  font-family: var(--font);
+}
+
+.tooltipDate {
+  fill: var(--text-muted);
+  font-size: 10px;
+  font-family: var(--font);
+}
+
+.tooltipPrice {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 600;
   font-family: var(--font);
 }
