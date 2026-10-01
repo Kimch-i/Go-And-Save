@@ -7,14 +7,14 @@ once for clear roads, and once for the traffic happening right now.
 **API:** https://gas-server-scf1.onrender.com/healthz
 **Demo video:** (link)
 
-![The Trip Planner Page](docs/assets/TripPlanner.png)
-![List of Vehicles](docs/assets/Vehicles.png)
-![Price graph of Gasoline](docs/assets/FuelPriceGasoline.png)
-![Price graph of Diesel](docs/assets/FuelPriceDiesel.png)
-![List of Save Trips](docs/assets/SaveTrips.png)
-![Profile Page](docs/assets/Profile.png)
-![Page for LogIn](docs/assets/LogIn.png)
-![Page for SignUp](docs/assets/SignUp.png)
+![The Trip Planner Page](docs/assets/readme-screenshots/TripPlanner.png)
+![List of Vehicles](docs/assets/readme-screenshots/Vehicles.png)
+![Price graph of Gasoline](docs/assets/readme-screenshots/FuelPriceGasoline.png)
+![Price graph of Diesel](docs/assets/readme-screenshots/FuelPriceDiesel.png)
+![List of Save Trips](docs/assets/readme-screenshots/SaveTrips.png)
+![Profile Page](docs/assets/readme-screenshots/Profile.png)
+![Page for LogIn](docs/assets/readme-screenshots/LogIn.png)
+![Page for SignUp](docs/assets/readme-screenshots/SignUp.png)
 
 ## What it does
 
