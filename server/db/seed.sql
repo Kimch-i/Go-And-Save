@@ -95,9 +95,14 @@ VALUES
   ('Yamaha', 'NMAX', 2020, 2023, 'gasoline', 38, 43, 125, 0.2);
 
 -- Weekly fuel prices.
+
 INSERT INTO fuel_prices
   (fuel_type, price_per_liter, week_of)
 VALUES
+  ('gasoline', 71.00, '2026-05-04'),
+  ('diesel', 86.90, '2026-05-04'),
+  ('gasoline', 85.60, '2026-05-11'),
+  ('diesel', 88.45, '2026-05-11'),
   ('gasoline', 59.2, '2026-06-08'),
   ('diesel', 56.1, '2026-06-08'),
   ('gasoline', 59.8, '2026-06-15'),
