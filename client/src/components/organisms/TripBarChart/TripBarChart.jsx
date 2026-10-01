@@ -34,6 +34,13 @@ export default function TripBarChart({ data, color = 'var(--brand-fill)', valueF
   const barHeight = (value) => bottom - barY(value);
 
   const showEveryLabel = data.length <= 7;
+  const maxIndex = values.indexOf(Math.max(...values));
+  // With few enough bars every one gets its value shown. With more, only the
+  // first, last and tallest get one, same bars that keep a date label below
+  // them, so there's always a number to read without the chart turning into
+  // a wall of overlapping text.
+  const showValueFor = (i) =>
+    showEveryLabel || i === 0 || i === data.length - 1 || i === maxIndex;
 
   return (
     <div className={styles.box}>
@@ -65,11 +72,20 @@ export default function TripBarChart({ data, color = 'var(--brand-fill)', valueF
               </text>
             );
           })}
-          {values.length > 0 && (
-            <text x={barX(values.indexOf(Math.max(...values))) + barWidth / 2} y={barY(Math.max(...values)) - 6} textAnchor="middle" className={styles.valueLabel}>
-              {valueFormatter(Math.max(...values))}
-            </text>
-          )}
+          {data.map((row, i) => {
+            if (!showValueFor(i)) return null;
+            return (
+              <text
+                key={`value-${row.label}-${i}`}
+                x={barX(i) + barWidth / 2}
+                y={barY(row.value) - 6}
+                textAnchor="middle"
+                className={i === maxIndex ? styles.valueLabel : styles.valueLabelMuted}
+              >
+                {valueFormatter(row.value)}
+              </text>
+            );
+          })}
         </svg>
       </div>
     </div>
