@@ -4,7 +4,7 @@ GAS tells a Philippine driver what a trip will cost in fuel before they leave:
 once for clear roads, and once for the traffic happening right now.
 
 **Live site:** https://kimch-i.github.io/Go-And-Save/
-**API:** https://gas-server-scf1.onrender.com
+**API:** https://gas-server-scf1.onrender.com/healthz
 **Demo video:** (link)
 
 ![The Trip Planner Page](docs/assets/TripPlanner.png)
