@@ -246,9 +246,12 @@ Kimchi © 2026
 
 ![Built with AI assistance](https://img.shields.io/badge/built%20with-AI%20assistance-0b5fff)
 
-Claude (Anthropic) was used as an AI coding assistant throughout the project for
-coding support, debugging, troubleshooting, and implementation assistance. The
-full details are available in [AI-USAGE.md](AI-USAGE.md).
+I used Claude (Anthropic) as an AI coding assistant throughout the project, for
+most features and most debugging — the frontend structure, the TomTom and
+Nominatim integrations, the database schema, and fixing real production bugs
+along the way. I reviewed and tested everything it gave me and adjusted it to
+fit my system. The full session-by-session log is in
+[AI-USAGE.md](AI-USAGE.md).
 
 ## Licence
 
