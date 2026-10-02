@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import TripTable from '../../components/organisms/TripTable/TripTable.jsx';
 import TripBarChart from '../../components/organisms/TripBarChart/TripBarChart.jsx';
 import EmptyState from '../../components/molecules/EmptyState/EmptyState.jsx';
+import ConfirmDialog from '../../components/molecules/ConfirmDialog/ConfirmDialog.jsx';
 import Spinner from '../../components/atoms/Spinner/Spinner.jsx';
 import { listTrips } from '../../api/index.js';
 import { formatPesoRounded, formatWeek } from '../../lib/format.js';
@@ -32,6 +33,10 @@ function groupByDay(trips) {
 export default function TripsPage({ vehicles, session, onRemoveTrip }) {
   const [trips, setTrips] = useState(null);
   const [error, setError] = useState('');
+  // The trip waiting on a yes/no answer in the ConfirmDialog below, or null
+  // when the dialog is closed. Holding the whole trip (not just its id) lets
+  // the dialog show the route in its message.
+  const [pendingRemove, setPendingRemove] = useState(null);
 
   useEffect(() => {
     listTrips()
@@ -39,12 +44,11 @@ export default function TripsPage({ vehicles, session, onRemoveTrip }) {
       .catch((err) => setError(err.message));
   }, []);
 
-  // Removing a trip here, not inside TripTable, so the charts above (which
-  // are derived from this same trips state) update right along with the list.
-  async function handleRemove(id) {
-    if (!window.confirm('Remove this trip? This cannot be undone.')) return;
-    await onRemoveTrip(id);
-    setTrips((current) => current.filter((trip) => trip.id !== id));
+  async function confirmRemove() {
+    const trip = pendingRemove;
+    setPendingRemove(null);
+    await onRemoveTrip(trip.id);
+    setTrips((current) => current.filter((t) => t.id !== trip.id));
   }
 
   if (error) {
@@ -133,12 +137,22 @@ export default function TripsPage({ vehicles, session, onRemoveTrip }) {
         </div>
       )}
 
-      <TripTable trips={trips} vehicles={vehicles} onRemove={handleRemove} />
+      <TripTable trips={trips} vehicles={vehicles} onRemove={setPendingRemove} />
 
       {!session && (
         <p className={`${styles.guestNote} small muted`}>
           These trips are saved on this device. <Link to="/auth?tab=signup">Sign up</Link> to keep them on your account.
         </p>
+      )}
+
+      {pendingRemove && (
+        <ConfirmDialog
+          title="Remove this trip?"
+          message="This cannot be undone."
+          confirmLabel="Remove"
+          onConfirm={confirmRemove}
+          onCancel={() => setPendingRemove(null)}
+        />
       )}
     </>
   );

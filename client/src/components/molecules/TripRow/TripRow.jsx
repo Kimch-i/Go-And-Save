@@ -13,7 +13,7 @@ export default function TripRow({ trip, routeText, vehicleName, onRemove }) {
       <td className={`${styles.money} num muted`}>{formatPeso(trip.idealCost)}</td>
       <td className={`${styles.money} num`}>{formatPeso(trip.actualCost)}</td>
       <td className={styles.remove}>
-        <Button variant="link" onClick={() => onRemove(trip.id)} aria-label={`Remove trip ${routeText}`}>
+        <Button variant="link" onClick={() => onRemove(trip)} aria-label={`Remove trip ${routeText}`}>
           Remove
         </Button>
       </td>

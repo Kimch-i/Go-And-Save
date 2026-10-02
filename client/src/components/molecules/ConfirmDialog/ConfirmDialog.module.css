@@ -1,0 +1,52 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  z-index: 100;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: var(--space-3);
+}
+
+.title {
+  font-size: var(--size-heading);
+  font-weight: 600;
+  margin: 0;
+}
+
+.message {
+  margin: var(--space-1) 0 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+.confirm {
+  padding: 11px 18px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  background: var(--danger);
+  color: var(--brand-on-fill);
+  cursor: pointer;
+  transition: filter 0.12s ease;
+}
+
+.confirm:hover {
+  filter: brightness(1.08);
+}

@@ -20,7 +20,7 @@ export default function TripCard({ trip, routeText, vehicleName, onRemove }) {
         <b className="num">{formatPeso(trip.actualCost)}</b>
       </p>
       <p className={styles.end}>
-        <Button variant="link" onClick={() => onRemove(trip.id)} aria-label={`Remove trip ${routeText}`}>
+        <Button variant="link" onClick={() => onRemove(trip)} aria-label={`Remove trip ${routeText}`}>
           Remove
         </Button>
       </p>
