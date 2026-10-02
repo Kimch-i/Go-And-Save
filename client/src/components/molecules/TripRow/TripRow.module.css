@@ -10,3 +10,8 @@
 .money {
   text-align: right;
 }
+
+.remove {
+  text-align: right;
+  white-space: nowrap;
+}

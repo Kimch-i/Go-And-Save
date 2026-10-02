@@ -22,6 +22,7 @@ export const {
   deleteVehicle,
   listTrips,
   createTrip,
+  deleteTrip,
   deleteAccountData,
   signUp,
   logIn,

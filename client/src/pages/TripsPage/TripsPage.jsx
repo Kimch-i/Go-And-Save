@@ -29,7 +29,7 @@ function groupByDay(trips) {
 }
 
 // Saved trips, this month's totals, and how much was lost to traffic.
-export default function TripsPage({ vehicles, session }) {
+export default function TripsPage({ vehicles, session, onRemoveTrip }) {
   const [trips, setTrips] = useState(null);
   const [error, setError] = useState('');
 
@@ -38,6 +38,14 @@ export default function TripsPage({ vehicles, session }) {
       .then(setTrips)
       .catch((err) => setError(err.message));
   }, []);
+
+  // Removing a trip here, not inside TripTable, so the charts above (which
+  // are derived from this same trips state) update right along with the list.
+  async function handleRemove(id) {
+    if (!window.confirm('Remove this trip? This cannot be undone.')) return;
+    await onRemoveTrip(id);
+    setTrips((current) => current.filter((trip) => trip.id !== id));
+  }
 
   if (error) {
     return (
@@ -125,7 +133,7 @@ export default function TripsPage({ vehicles, session }) {
         </div>
       )}
 
-      <TripTable trips={trips} vehicles={vehicles} />
+      <TripTable trips={trips} vehicles={vehicles} onRemove={handleRemove} />
 
       {!session && (
         <p className={`${styles.guestNote} small muted`}>

@@ -20,6 +20,10 @@
   text-align: right;
 }
 
+.table th.remove {
+  width: 1%;
+}
+
 .cards {
   display: none;
   margin: 0;

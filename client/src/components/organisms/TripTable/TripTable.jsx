@@ -8,7 +8,7 @@ function routeText(trip) {
   return shortPlace(trip.originLabel) + arrow + shortPlace(trip.destLabel);
 }
 
-export default function TripTable({ trips, vehicles }) {
+export default function TripTable({ trips, vehicles, onRemove }) {
   function vehicleName(id) {
     const vehicle = vehicles.find((v) => v.id === id);
     return vehicle ? vehicle.nickname : 'Removed vehicle';
@@ -25,18 +25,31 @@ export default function TripTable({ trips, vehicles }) {
             <th scope="col" className={styles.money}>Distance</th>
             <th scope="col" className={styles.money}>Clear road</th>
             <th scope="col" className={styles.money}>Actual</th>
+            <th scope="col" className={styles.remove}><span className="sr-only">Remove</span></th>
           </tr>
         </thead>
         <tbody>
           {trips.map((trip) => (
-            <TripRow key={trip.id} trip={trip} routeText={routeText(trip)} vehicleName={vehicleName(trip.vehicleId)} />
+            <TripRow
+              key={trip.id}
+              trip={trip}
+              routeText={routeText(trip)}
+              vehicleName={vehicleName(trip.vehicleId)}
+              onRemove={onRemove}
+            />
           ))}
         </tbody>
       </table>
 
       <ul className={styles.cards}>
         {trips.map((trip) => (
-          <TripCard key={trip.id} trip={trip} routeText={routeText(trip)} vehicleName={vehicleName(trip.vehicleId)} />
+          <TripCard
+            key={trip.id}
+            trip={trip}
+            routeText={routeText(trip)}
+            vehicleName={vehicleName(trip.vehicleId)}
+            onRemove={onRemove}
+          />
         ))}
       </ul>
     </>

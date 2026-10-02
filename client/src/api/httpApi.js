@@ -1,7 +1,7 @@
 // Calls the GAS Express API. Routes the server provides:
 //   GET /api/places?q=  GET /api/route?from=&to=  GET /api/prices  GET /api/cars?q=
 //   POST /api/auth/signup  POST /api/auth/login
-//   GET+POST /api/vehicles  DELETE /api/vehicles/:id  GET+POST /api/trips
+//   GET+POST /api/vehicles  DELETE /api/vehicles/:id  GET+POST /api/trips  DELETE /api/trips/:id
 //   PUT+DELETE /api/account
 //
 // A guest has no account, so their cars live in this browser (services/storage.js)
@@ -94,6 +94,9 @@ export async function listTrips() {
 
 export const createTrip = (input) =>
   request('/api/trips', { method: 'POST', body: JSON.stringify(input) });
+
+export const deleteTrip = (id) =>
+  request(`/api/trips/${id}`, { method: 'DELETE' });
 
 export async function deleteAccountData() {
   if (!isLoggedIn()) {

@@ -209,6 +209,19 @@ app.post('/api/trips', requireAuth, async (request, response, next) => {
   }
 })
 
+app.delete('/api/trips/:id', requireAuth, async (request, response, next) => {
+  // "abc" is not an id Postgres can compare, so answer before asking it.
+  if (!/^\d+$/.test(request.params.id)) return response.status(404).json({ error: 'Not found' })
+ 
+  try {
+    const removed = await trips.remove(pool, request.userId, request.params.id)
+    if (!removed) return response.status(404).json({ error: 'Not found' })
+    response.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+})
+
 // Change the name or email on the account.
 app.put('/api/account', requireAuth, async (request, response, next) => {
   const body = request.body ?? {}

@@ -13,7 +13,7 @@ import ProfilePage from './pages/ProfilePage/ProfilePage.jsx';
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage.jsx';
 import {
   listFuelPrices, listVehicles, createVehicle, deleteVehicle, deleteAccountData,
-  updateAccount, migrateGuestVehicles,
+  updateAccount, migrateGuestVehicles, deleteTrip,
 } from './api/index.js';
 import * as storage from './services/storage.js';
 import { applyTheme } from './lib/theme.js';
@@ -83,6 +83,10 @@ export default function App() {
     });
   }
 
+  async function removeTrip(id) {
+  await deleteTrip(id);
+}
+
   // Save the token first, because moving the guest's cars needs it. Only then
   // update state, so the vehicle list reloads after the cars have moved.
   // Returns the old-id to new-id map for a trip held during login.
@@ -141,7 +145,7 @@ export default function App() {
           />
           <Route path="vehicles/add" element={<AddVehiclePage onAddVehicle={addVehicle} />} />
           <Route path="prices" element={<PricesPage fuelPrices={fuelPrices} />} />
-          <Route path="trips" element={<TripsPage vehicles={vehicles} session={session} />} />
+          <Route path="trips" element={<TripsPage vehicles={vehicles} session={session} onRemoveTrip={removeTrip} />} />
           <Route
             path="profile"
             element={

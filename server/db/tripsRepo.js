@@ -32,3 +32,14 @@ export async function create(pool, userId, trip) {
   )
   return result.rows[0]
 }
+
+// Only delete a trip if it belongs to the logged-in user -- same ownership
+// check as vehiclesRepo.remove, so nobody can delete someone else's trip by
+// guessing an id.
+export async function remove(pool, userId, id) {
+  const result = await pool.query(
+    'DELETE FROM trips WHERE id = $1 AND user_id = $2 RETURNING id',
+    [id, userId]
+  )
+  return result.rowCount > 0
+}

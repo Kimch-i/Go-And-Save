@@ -15,3 +15,8 @@
   font-weight: 400;
   color: var(--text);
 }
+
+.end {
+  margin-top: var(--space-1);
+  text-align: right;
+}
