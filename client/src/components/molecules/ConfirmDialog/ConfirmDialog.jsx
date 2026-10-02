@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import Button from '../../atoms/Button/Button.jsx';
 import styles from './ConfirmDialog.module.css';
 
 // A small modal that matches the rest of the app (dark/light theme tokens,
@@ -28,9 +27,9 @@ export default function ConfirmDialog({ title, message, confirmLabel = 'Remove',
         <h2 id="confirm-dialog-title" className={styles.title}>{title}</h2>
         <p id="confirm-dialog-message" className={`${styles.message} small muted`}>{message}</p>
         <div className={styles.actions}>
-          {/* Focus lands here, not on Remove, so the safe choice is what
+          {/* Focus lands here, not on confirm, so the safe choice is what
               Enter/Space triggers if the user doesn't move first. */}
-          <Button variant="ghost" autoFocus onClick={onCancel}>Cancel</Button>
+          <button type="button" className={styles.cancel} autoFocus onClick={onCancel}>Cancel</button>
           <button type="button" className={styles.confirm} onClick={onConfirm}>{confirmLabel}</button>
         </div>
       </div>

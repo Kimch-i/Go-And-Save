@@ -36,17 +36,32 @@
   margin-top: var(--space-3);
 }
 
+.cancel,
 .confirm {
-  padding: 11px 18px;
-  border: 0;
+  padding: 7px 14px;
   border-radius: var(--radius-sm);
+  font-size: var(--size-small);
   font-weight: 500;
-  background: var(--danger);
-  color: var(--brand-on-fill);
   cursor: pointer;
-  transition: filter 0.12s ease;
+  transition: filter 0.12s ease, border-color 0.12s ease;
+}
+
+.cancel {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.cancel:hover {
+  border-color: var(--text-muted);
+}
+
+.confirm {
+  border: 0;
+  background: var(--brand-fill);
+  color: var(--brand-on-fill);
 }
 
 .confirm:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
 }
