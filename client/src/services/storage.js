@@ -11,7 +11,7 @@ const KEYS = {
 const DEFAULT_PREFS = {
   defaultVehicleId: null,
   lastVehicleId: null,
-  home: { label: 'Porac, Pampanga', lat: 15.0719, lon: 120.5420 },
+  home: null,
 };
 
 // localStorage survives closing the browser; sessionStorage is wiped when the
