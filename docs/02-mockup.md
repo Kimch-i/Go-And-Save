@@ -1,24 +1,31 @@
 # Mockup
 
-Your prelim wireframes are finished and are not being redone. The mockup is what
-the app will actually look like: the wireframes painted in, with your real
-colours, type, spacing and content.
+## Screens
 
-**This is submitted as images or a PDF.** A written description of a picture
-scores in the lowest band, because the thing being asked for is the picture.
+| # | Route | Screen | Image |
+|---|-------|--------|-------|
+| 1 | `/` | Trip Planner | ![Trip Planner](assets/mockup-screenshots/Desktop/TripPlanner.png) |
+| 2 | `/vehicles` | My Vehicles | ![Vehicles](assets/mockup-screenshots/Desktop/Vehicles.png) |
+| 3 | `/vehicles/add` | Add Vehicle | ![Add Vehicles](assets/mockup-screenshots/Desktop/AddVehicles.png) |
+| 4 | `/prices` | Fuel Prices | ![Gasoline prices](assets/mockup-screenshots/Desktop/FuelPriceGasoline.png) ![Diesel prices](assets/mockup-screenshots/Desktop/FuelPriceDiesel.png) |
+| 5 | `/trips` | Saved Trips | ![Saved Trips](assets/mockup-screenshots/Desktop/SaveTrips.png) |
+| 6 | `/auth` | Log in / Sign up | ![Log in](assets/mockup-screenshots/Desktop/LogIn.png) ![Sign up](assets/mockup-screenshots/Desktop/SignUp.png) |
+| 7 | `/profile` | Profile | ![Profile](assets/mockup-screenshots/Desktop/Profile.png) |
 
-Put the exported images in `assets/` and link them here, so the repository
-carries them too.
+## Empty state
 
-## What it should show
+![Empty Trip Planner](assets/mockup-screenshots/Desktop/EmptyTripPlanner.png)
+![Empty Vehicles](assets/mockup-screenshots/Desktop/EmptyVehicles.png)
+![Empty Saved Trips](assets/mockup-screenshots/Desktop/EmptyTrips.png)
 
-- Every screen in your revised proposal, and no screens that are not in it
-- Real content, not "Lorem ipsum" and not "Title here"
-- The empty state of at least one screen, because that is the one people forget
-- What it looks like on a phone
+## Phone view
 
-## Honest note
-
-Anything in the mockup that is not in the built app by the end needs a sentence
-in your journal explaining what happened. That is a normal part of building
-something, and saying so reads far better than quietly shipping less.
+| # | Route | Screen | Image |
+|---|-------|--------|-------|
+| 1 | `/` | Trip Planner | ![Trip Planner](assets/mockup-screenshots/Mobile/TripPlanner.png) ![Trip Planner](assets/mockup-screenshots/Mobile/TripPlanner1.png) |
+| 2 | `/vehicles` | My Vehicles | ![Vehicles](assets/mockup-screenshots/Mobile/Vehicles.png) |
+| 3 | `/vehicles/add` | Add Vehicle | ![Add Vehicles](assets/mockup-screenshots/Mobile/AddVehicles.png) ![Add Vehicles](assets/mockup-screenshots/Mobile/AddVehicles1.png)  |
+| 4 | `/prices` | Fuel Prices | ![Gasoline prices](assets/mockup-screenshots/Mobile/FuelPriceGasoline.png) ![Diesel prices](assets/mockup-screenshots/Mobile/FuelPriceDiesel.png) |
+| 5 | `/trips` | Saved Trips | ![Saved Trips](assets/mockup-screenshots/Mobile/SaveTrips.png) ![Saved Trips](assets/mockup-screenshots/Mobile/SaveTrips1.png) ![Saved Trips](assets/mockup-screenshots/Mobile/SaveTrips2.png)|
+| 6 | `/auth` | Log in / Sign up | ![Log in](assets/mockup-screenshots/Mobile/LogIn.png) ![Sign up](assets/mockup-screenshots/Mobile/SignUp.png) |
+| 7 | `/profile` | Profile | ![Profile](assets/mockup-screenshots/Mobile/Profile.png) ![Profile](assets/mockup-screenshots/Mobile/Profile1.png) |

@@ -41,7 +41,7 @@ for its job can.
 Dark is the default theme. Light is the alternative. Switching theme changes one
 attribute on `<html>` and no layout moves.
 
-![Colour roles, dark and light](assets/design-system-screenshot/colour-roles.png)
+![Colour roles, dark and light](assets/design-system-screenshots/colour-roles.png)
 
 | Role | Used for | Dark | Light |
 |------|----------|------|-------|
@@ -84,7 +84,7 @@ must be rechecked.
 
 Font family: **Inter** (weights 400, 500 and 600), loaded from Google Fonts. The fallback stack is the system UI fonts (`-apple-system`, Segoe UI, Roboto, sans-serif).
 
-![Type scale](assets/design-system-screenshot/type-scale.png)
+![Type scale](assets/design-system-screenshots/type-scale.png)
 
 | Name | Size and weight | Used for |
 |------|-----------------|----------|
@@ -102,7 +102,7 @@ All figures use tabular numerals so they line up.
 
 One scale. Everything is a multiple of 8. No arbitrary values.
 
-![Spacing scale](assets/design-system-screenshot/spacing-scale.png)
+![Spacing scale](assets/design-system-screenshots/spacing-scale.png)
 
 | Token | Value |
 |-------|-------|
@@ -118,7 +118,7 @@ and tags, and 10px for cards. Two values, not five.
 
 Each reusable piece is built once and rendered with different props.
 
-![Components, dark and light](assets/design-system-screenshot/components-dark-light.png)
+![Components, dark and light](assets/design-system-screenshots/components-dark-light.png)
 
 Only `CostCard` renders differently between the two uses on the planner. The
 `emphasis` prop makes "Leaving now" larger and filled while "If the road were
@@ -146,19 +146,19 @@ A level never imports the level above it. `CostCard` imports `Tag`, never
 The focus ring is 2px `--brand` on every interactive element, and because `--brand` is a role it stays visible in both
 themes (8.42 dark, 5.39 light).
 
-![Button states](assets/design-system-screenshot/states-button.png)
+![Button states](assets/design-system-screenshots/states-button.png)
 
-![TextInput states](assets/design-system-screenshot/states-textinput.png)
+![TextInput states](assets/design-system-screenshots/states-textinput.png)
 
-![Stepper states](assets/design-system-screenshot/states-stepper.png)
+![Stepper states](assets/design-system-screenshots/states-stepper.png)
 
-![CostCard states, flat and emphasised](assets/design-system-screenshot/states-costcard.png)
+![CostCard states, flat and emphasised](assets/design-system-screenshots/states-costcard.png)
 
 ### Screen states
 
 Loading, empty, error and data are four different screens.
 
-![Screen states: loading, empty, error, data](assets/design-system-screenshot/states-screen.png)
+![Screen states: loading, empty, error, data](assets/design-system-screenshots/states-screen.png)
 
 ## Responsive plan
 
@@ -167,7 +167,7 @@ One breakpoint, at 768px. Each component module has a single
 
 ### Mobile, below 768px (designed at 375px)
 
-![Responsive plan, mobile](assets/design-system-screenshot/responsive-mobile.png)
+![Responsive plan, mobile](assets/design-system-screenshots/responsive-mobile.png)
 
 - The "Leaving now" card moves above the other one, because the first card is the
   one that gets read.
@@ -180,7 +180,7 @@ One breakpoint, at 768px. Each component module has a single
 
 ### Desktop, 768px and up
 
-![Responsive plan, desktop](assets/design-system-screenshot/responsive-desktop.png)
+![Responsive plan, desktop](assets/design-system-screenshots/responsive-desktop.png)
 
 - The Trip Planner is two columns, a 200px form rail plus a flexible map and
   results column.
