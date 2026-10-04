@@ -5,7 +5,7 @@ once for clear roads, and once for the traffic happening right now.
 
 **Live site:** https://kimch-i.github.io/Go-And-Save/
 **API:** https://gas-server-scf1.onrender.com/healthz
-**Demo video:** https://drive.google.com/drive/folders/1-mJi72U0fIvGUdqf4sGZ5gDIP5LMJOA2?usp=sharing
+**Demo video:** https://drive.google.com/file/d/1FP3a8QMY90J2CAwJfEkG-PJG1AHJW1UI/view?usp=sharing
 
 ![The Trip Planner Page](docs/assets/readme-screenshots/TripPlanner.png)
 ![List of Vehicles](docs/assets/readme-screenshots/Vehicles.png)
