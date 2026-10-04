@@ -224,19 +224,11 @@ or cargo updates the figures without a request.
 - The app has six routes, `/profile` included. The proposal caps it at five.
   This needs a decision, and the proposal, wireframes and design system
   should then agree with each other.
-- Security checklist (`docs/06-security-and-privacy.md`) has not been walked
-  through box by box, even though several items (parameterised queries,
-  scoped CORS, helmet, rate limiting, a clean `npm audit`) are now true.
 
 ## What I would do next
-
-- Finish `AI-USAGE.md`, now that `server/` has substantial work behind it
-- Walk through the security and privacy checklist properly
-- Decide the `/profile` route question and bring the proposal, wireframes and
-  design system back into agreement
-- Keep weekly reports and the reflection journal up day by day instead of
-  writing them after the fact
-- Record the demo video
+- Move off Nominatim's shared free server to something like LocationIQ or Geoapify so place search stops depending on another host's IP reputation.
+- The app's DB credential currently has more access than it needs. Scope it down so a bug in my code can't do as much damage as the reseed incident did.
+- Right now a new price week only reaches the live app after I run the seed script by hand. I'd automate that step now that seeding is safe to run unattended.
 
 ## Developer
 
