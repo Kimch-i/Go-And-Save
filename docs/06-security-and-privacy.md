@@ -50,9 +50,3 @@
 - [x] If your app collects anything about anyone, the app says what it
       collects. The system only collects user information when the user chooses to sign up for an account.
 - [x] Any face in a screenshot is stock, generated, or yours. There are no faces shown in any of the screenshots.
-
-## Journal paragraph — raw material
-
-- I checked the app-security requirements and confirmed that the main areas are covered: parameterized queries, ownership checks, rate limiting, bcrypt password hashing, and no audit vulnerabilities found.
-- For privacy, I checked the demo video and confirmed that no real classmates appear in it. I was also the only person who tested the system, so there is no other person’s data in the database.
-- One tradeoff I identified is that saved trips store origin_label and dest_label as free text, with a limit of 300 characters. This could reveal places such as where a user lives or works, especially if they enter something like “home” as the origin. I accepted this because the system needs the actual origin and destination to calculate the two fuel-cost figures.
