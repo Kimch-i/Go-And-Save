@@ -20,11 +20,10 @@ name: Update fuel prices
 
 on:
   schedule:
-    # Mondays 01:00 UTC (09:00 Manila), when oil companies announce the week's
-    # adjustment, and Tuesdays 01:00 UTC to catch a source that published late.
-    # A run that finds the same prices changes nothing.
-    - cron: '0 1 * * 1'
-    - cron: '0 1 * * 2'
+    # Every day at 01:00 UTC (09:00 Manila). Adjustments take effect on
+    # Tuesdays, sometimes mid-week during a crisis, and sources publish at
+    # different times; a run that finds the same prices changes nothing.
+    - cron: '0 1 * * *'
   workflow_dispatch: {} # "Run workflow" button in the Actions tab, to update right now
 
 permissions:

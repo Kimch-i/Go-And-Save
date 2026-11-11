@@ -127,24 +127,28 @@ request after a while takes 30 to 60 seconds to wake it up.
 
 Prices update themselves, no pull request and no command to run. A scheduled
 GitHub Actions workflow (`.github/workflows/update-fuel-prices.yml`) runs every
-Monday, when oil companies announce the week's adjustment, and again on Tuesday
-in case a source published late. It can also be started by hand from the Actions
-tab with **Run workflow**.
+day at 9:00 AM Manila time. Price adjustments take effect on Tuesdays, sometimes
+mid-week, so a daily check picks them up the day they apply. It can also be
+started by hand from the Actions tab with **Run workflow**.
 
-Each run reads two public sources and takes each fuel from the first one that
+Each run reads three public sources and takes each fuel from the first one that
 gives a plausible price (`PREFERRED_SOURCES` in `scripts/update-fuel-prices.mjs`):
 
-| Fuel | First choice | Fallback |
-| --- | --- | --- |
-| Gasoline | [DailyFuels](https://www.dailyfuels.com/philippines/) | [GlobalPetrolPrices](https://www.globalpetrolprices.com/Philippines/) |
-| Diesel | GlobalPetrolPrices | DailyFuels |
+1. [Philstar's weekly Price Tracker](https://www.philstar.com/tags/price-tracker),
+   the Metro Manila common price with the DOE-announced adjustment applied,
+   published the morning a hike or rollback takes effect and dated that day.
+   Gasoline is RON91 (regular). The table is a Datawrapper chart, read from its
+   public CSV, and each row is checked: old price plus adjustment must equal
+   the new price.
+2. [DailyFuels](https://www.dailyfuels.com/philippines/), regular gasoline and
+   diesel. Slower to reflect adjustments and only gives the month, so a price
+   from here is dated the day the run saw it.
+3. [GlobalPetrolPrices](https://www.globalpetrolprices.com/Philippines/), dated
+   retail prices, but often a week behind and its gasoline is RON95 (premium),
+   so it is the last resort for gasoline and the second choice for diesel.
 
-GlobalPetrolPrices publishes the retail pump price with taxes, dated to the day
-it applies, but its gasoline figure is 95-octane premium, roughly ₱10 to ₱14
-above regular. Gasoline therefore comes from DailyFuels, the regular-grade
-series the existing history was built from, so the chart and the fill-up-now
-reading compare like with like. A price with no exact date is dated the day the
-run saw it.
+These are Metro Manila reference prices. Actual pump prices differ by province
+and station, usually by a few pesos.
 
 If the prices differ from the latest recorded ones, the workflow commits them
 to `seed.sql` and `seed.json` on `main`, upserts every fuel price into the live

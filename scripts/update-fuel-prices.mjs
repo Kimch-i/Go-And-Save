@@ -9,8 +9,7 @@
 //   in PREFERRED_SOURCES that gave a plausible peso price for it. A source that
 //   is down, blocks the request, or changed its layout is skipped, not trusted.
 // - If either fuel has no plausible price, it exits with an error and writes
-//   NOTHING. The
-//   workflow then fails loudly (you get a GitHub notification) instead of a bad
+//   NOTHING. The workflow then fails loudly (you get a GitHub notification) instead of a bad
 //   number quietly landing in the app.
 // - If the prices are the same as the latest ones already recorded, or that
 //   date is already recorded, it changes nothing. Otherwise it edits
@@ -29,9 +28,46 @@ const MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8,
 
 // Each source returns { gasoline, diesel }, each { price, asOf } or null.
 const SOURCES = {
+  // Philstar's weekly "Price Tracker: Oil, fuel monitor" article: the Metro
+  // Manila common price with the DOE-announced adjustment already applied, out
+  // the morning the hike or rollback takes effect (usually Tuesday). The only
+  // source here that reflects a rollback the same week. The table is a
+  // Datawrapper chart whose raw CSV is public.
+  PhilstarPriceTracker: {
+    url: 'https://www.philstar.com/tags/price-tracker',
+    async read() {
+      const listing = await fetchText('https://www.philstar.com/tags/price-tracker')
+      // Newest article by the date in its URL: /business/2026/11/10/2568976/price-tracker-...
+      const articles = [
+        ...listing.matchAll(/https:\/\/www\.philstar\.com\/[a-z-]+\/(\d{4})\/(\d{2})\/(\d{2})\/\d+\/price-tracker-oil-fuel-monitor[a-z0-9-]*/g),
+      ]
+        .map((m) => ({ url: m[0], date: `${m[1]}-${m[2]}-${m[3]}` }))
+        .sort((a, b) => a.date.localeCompare(b.date))
+      const latest = articles.at(-1)
+      if (!latest) return null
+
+      const article = await fetchText(latest.url)
+      const chartId = article.match(/datawrapper\.dwcdn\.net\/([A-Za-z0-9]+)\//)?.[1]
+      if (!chartId) return null
+      // The bare chart URL only redirects (via a meta refresh) to its newest version.
+      const redirect = await fetchText(`https://datawrapper.dwcdn.net/${chartId}/`)
+      const version = redirect.match(new RegExp(`datawrapper\\.dwcdn\\.net/${chartId}/(\\d+)/`))?.[1]
+      if (!version) return null
+      const csv = await fetchText(`https://datawrapper.dwcdn.net/${chartId}/${version}/dataset.csv`)
+
+      const prices = readPriceTrackerCsv(csv)
+      if (!prices) return null
+      // Philstar reuses one chart for several weeks, editing it in place, so
+      // the article's date is the price's date, not anything inside the chart.
+      return {
+        gasoline: { price: prices['Gasoline (RON91)'], asOf: latest.date },
+        diesel: { price: prices['Diesel'], asOf: latest.date },
+      }
+    },
+  },
   // Philippine retail pump prices with taxes, published weekly with the exact
-  // date they apply to. Its gasoline is 95-octane (premium), though, which sits
-  // well above the regular gasoline the rest of the chart's history tracks.
+  // date they apply to. Often a week behind an adjustment, and its gasoline is
+  // 95-octane (premium), roughly ₱7 above regular RON91.
   GlobalPetrolPrices: {
     url: 'https://www.globalpetrolprices.com/Philippines/',
     async read() {
@@ -42,8 +78,9 @@ const SOURCES = {
       return { gasoline: readGlobalPetrolPrice(gasolineHtml), diesel: readGlobalPetrolPrice(dieselHtml) }
     },
   },
-  // Regular gasoline and diesel, the same series the existing history came
-  // from. Only says the month, so a price from here is dated the day it was read.
+  // Regular gasoline and diesel, the series the older history came from. Lags
+  // adjustments and only says the month, so a price from here is dated the
+  // day it was read.
   DailyFuels: {
     url: 'https://www.dailyfuels.com/philippines/',
     async read() {
@@ -56,11 +93,11 @@ const SOURCES = {
   },
 }
 
-// Best first; the next one is the fallback. Gasoline stays on DailyFuels so the
-// chart keeps comparing regular with regular; diesel prefers the dated source.
+// Best first; the next ones are fallbacks. Gasoline falls back to DailyFuels
+// before GlobalPetrolPrices so it stays regular grade rather than premium.
 const PREFERRED_SOURCES = {
-  gasoline: ['DailyFuels', 'GlobalPetrolPrices'],
-  diesel: ['GlobalPetrolPrices', 'DailyFuels'],
+  gasoline: ['PhilstarPriceTracker', 'DailyFuels', 'GlobalPetrolPrices'],
+  diesel: ['PhilstarPriceTracker', 'GlobalPetrolPrices', 'DailyFuels'],
 }
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -109,6 +146,27 @@ function readGlobalPetrolPrice(html) {
   )
   if (!match) return null
   return { price: Number(match[1]), asOf: toIsoDate(match[2], match[3], match[4]) }
+}
+
+// Products,Common Price,Adjustment Applied (P/L),Estimated New Price (P/L)
+// Diesel,93.3,-4.1,89.2
+// Gasoline (RON91),89.1,-16.8,72.3
+// Returns { product: estimated new price }, or null if the table doesn't
+// look like that, or a row's new price isn't its old price plus the adjustment.
+function readPriceTrackerCsv(csv) {
+  const [header, ...lines] = csv.trim().split(/\r?\n/).map((line) => line.split(','))
+  const oldIndex = header.findIndex((h) => /common price/i.test(h))
+  const adjustmentIndex = header.findIndex((h) => /adjustment/i.test(h))
+  const newIndex = header.findIndex((h) => /new price/i.test(h))
+  if (oldIndex === -1 || adjustmentIndex === -1 || newIndex === -1) return null
+
+  const prices = {}
+  for (const cells of lines) {
+    const [oldPrice, adjustment, newPrice] = [oldIndex, adjustmentIndex, newIndex].map((i) => Number(cells[i]))
+    if (Math.abs(oldPrice + adjustment - newPrice) > 0.05) return null
+    prices[cells[0].trim()] = newPrice
+  }
+  return prices
 }
 
 function toIsoDate(day, monthName, year) {
