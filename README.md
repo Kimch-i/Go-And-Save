@@ -131,14 +131,20 @@ Monday, when oil companies announce the week's adjustment, and again on Tuesday
 in case a source published late. It can also be started by hand from the Actions
 tab with **Run workflow**.
 
-Each run reads gasoline and diesel prices from the first source that gives a
-plausible pair (`SOURCES` in `scripts/update-fuel-prices.mjs`):
+Each run reads two public sources and takes each fuel from the first one that
+gives a plausible price (`PREFERRED_SOURCES` in `scripts/update-fuel-prices.mjs`):
 
-1. [GlobalPetrolPrices](https://www.globalpetrolprices.com/Philippines/), the
-   Philippine retail pump price with taxes, published weekly with the exact
-   date it applies to, which is used as the price's date in the chart.
-2. [DailyFuels](https://www.dailyfuels.com/philippines/) as a fallback. It only
-   gives the month, so the run's date is used instead.
+| Fuel | First choice | Fallback |
+| --- | --- | --- |
+| Gasoline | [DailyFuels](https://www.dailyfuels.com/philippines/) | [GlobalPetrolPrices](https://www.globalpetrolprices.com/Philippines/) |
+| Diesel | GlobalPetrolPrices | DailyFuels |
+
+GlobalPetrolPrices publishes the retail pump price with taxes, dated to the day
+it applies, but its gasoline figure is 95-octane premium, roughly ₱10 to ₱14
+above regular. Gasoline therefore comes from DailyFuels, the regular-grade
+series the existing history was built from, so the chart and the fill-up-now
+reading compare like with like. A price with no exact date is dated the day the
+run saw it.
 
 If the prices differ from the latest recorded ones, the workflow commits them
 to `seed.sql` and `seed.json` on `main`, upserts every fuel price into the live
