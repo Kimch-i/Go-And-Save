@@ -26,7 +26,7 @@ once for clear roads, and once for the traffic happening right now.
 - Pick your car from a catalog of 66 Philippine-market vehicles instead of
   guessing your km/L
 - Check this week's fuel price and whether it is worth filling up now, on a
-  price history that a weekly automated check keeps current (see
+  price history that a weekly automated update keeps current (see
   [Fuel price updates](#fuel-price-updates) below)
 
 Traffic does not change the distance, it changes the time. The extra cost is the
@@ -125,17 +125,31 @@ request after a while takes 30 to 60 seconds to wake it up.
 
 ## Fuel price updates
 
-Prices are not scraped live into the app. A scheduled GitHub Actions workflow
-(`.github/workflows/update-fuel-prices.yml`) checks a public price page once a
-week, and if it finds a plausible new number, opens a pull request with it
-rather than writing it into the database directly, I still have to look at
-the source and merge it myself. If the page cannot be parsed, the workflow
-fails loudly and nothing is written, on purpose, a bad number nobody checked
-is worse than a stale one.
+Prices update themselves, no pull request and no command to run. A scheduled
+GitHub Actions workflow (`.github/workflows/update-fuel-prices.yml`) runs every
+Monday, when oil companies announce the week's adjustment, and again on Tuesday
+in case a source published late. It can also be started by hand from the Actions
+tab with **Run workflow**.
 
-Merging that pull request only changes `seed.sql` and `seed.json` in the
-repo. It does not update the live database, `npm run db:seed` still has to be
-run against it by hand afterwards.
+Each run reads gasoline and diesel prices from the first source that gives a
+plausible pair (`SOURCES` in `scripts/update-fuel-prices.mjs`):
+
+1. [GlobalPetrolPrices](https://www.globalpetrolprices.com/Philippines/), the
+   Philippine retail pump price with taxes, published weekly with the exact
+   date it applies to, which is used as the price's date in the chart.
+2. [DailyFuels](https://www.dailyfuels.com/philippines/) as a fallback. It only
+   gives the month, so the run's date is used instead.
+
+If the prices differ from the latest recorded ones, the workflow commits them
+to `seed.sql` and `seed.json` on `main`, upserts every fuel price into the live
+Neon database, and redeploys the Pages site. If nothing changed, it changes
+nothing. If no source can be parsed, the run fails loudly and nothing is
+written, on purpose: a stale price is better than a wrong one.
+
+The database step needs a repository secret named `DATABASE_URL` (Settings >
+Secrets and variables > Actions), set once to the same Neon connection string
+Render uses. Without it the run still updates the repo and the site, and warns
+that the database was skipped.
 
 ## Project structure
 
@@ -164,7 +178,7 @@ run against it by hand afterwards.
       nominatim.js        place search
       db/                 pool, schema.sql, seed.sql, one repo file per table
     scripts/
-      update-fuel-prices.mjs   the weekly price check
+      update-fuel-prices.mjs   the weekly price update
     docs/                planning documents and weekly reports
 
 Each component is a folder with a `.jsx` file and a `.module.css` file. A level

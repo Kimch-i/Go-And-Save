@@ -1,27 +1,42 @@
-name: Check fuel prices
+name: Update fuel prices
 
-# Runs itself weekly. Fetches one public price page, sanity-checks the
-# numbers, and if there's a real change, opens a pull request for a human to
-# review and merge -- it never merges or deploys anything on its own.
+# Runs itself on a schedule. Reads this week's gasoline and diesel price from a
+# public source (see SOURCES in scripts/update-fuel-prices.mjs), sanity-checks
+# them, and if they changed:
+#   1. commits the new rows to seed.sql / seed.json on main,
+#   2. upserts every fuel price into the live database (Neon),
+#   3. redeploys the GitHub Pages client.
+# No pull request, no npm command, nothing to do by hand.
 #
-# Merging the PR only updates seed.sql / seed.json in the repo. It does NOT
-# touch the live database -- re-run the seed against Postgres after merging
-# if you want the deployed app to show the new prices.
+# ONE-TIME SETUP, in the browser:
+#   Settings > Secrets and variables > Actions > Secrets > New repository secret
+#     Name:  DATABASE_URL
+#     Value: the same Neon connection string Render uses
+# Without it, steps 1 and 3 still run and the database step is skipped with a
+# warning.
+#
+# If no source can be parsed, the run fails loudly (GitHub emails you) and
+# nothing is written -- a stale price is better than a wrong one.
 
 on:
   schedule:
-    # Mondays, 01:00 UTC (~09:00 Manila time). DOE/oil companies typically
-    # adjust prices weekly, sometimes twice during a crisis -- this is not
-    # meant to catch same-week revisions, only the usual weekly change.
+    # Mondays 01:00 UTC (09:00 Manila), when oil companies announce the week's
+    # adjustment, and Tuesdays 01:00 UTC to catch a source that published late.
+    # A run that finds the same prices changes nothing.
     - cron: '0 1 * * 1'
-  workflow_dispatch: {} # lets you trigger a run by hand from the Actions tab, to test it
+    - cron: '0 1 * * 2'
+  workflow_dispatch: {} # "Run workflow" button in the Actions tab, to update right now
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write # push the updated seed files to main
+  actions: write # start the Pages deploy (pushes made with GITHUB_TOKEN don't trigger it)
+
+concurrency:
+  group: fuel-prices
+  cancel-in-progress: false
 
 jobs:
-  check-prices:
+  update-prices:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,24 +49,46 @@ jobs:
         id: prices
         run: node scripts/update-fuel-prices.mjs
 
-      - name: Open a pull request if the price files changed
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: "chore: fuel prices for week of ${{ steps.prices.outputs.week_of }}"
-          branch: fuel-price-update
-          delete-branch: true
-          title: "Update fuel prices for week of ${{ steps.prices.outputs.week_of }}"
-          body: |
-            Auto-fetched by `.github/workflows/update-fuel-prices.yml`.
+      - name: Commit the new prices to main
+        if: steps.prices.outputs.changed == 'true'
+        run: |
+          git config user.name "Kimch-i"
+          git config user.email "180493315+Kimch-i@users.noreply.github.com"
+          git add server/db/seed.sql client/src/api/seed.json
+          git commit -m "chore: fuel prices for week of ${{ steps.prices.outputs.week_of }}" \
+            -m "Gasoline ₱${{ steps.prices.outputs.gasoline }}/L, diesel ₱${{ steps.prices.outputs.diesel }}/L. Source: ${{ steps.prices.outputs.source }}"
+          git pull --rebase origin main
+          git push origin HEAD:main
 
-            - Gasoline: ₱${{ steps.prices.outputs.gasoline }}/L
-            - Diesel: ₱${{ steps.prices.outputs.diesel }}/L
-            - Source: ${{ steps.prices.outputs.source }}
+      # Runs on every check, not only when something changed, so a week a past
+      # run failed to push catches up. It is an upsert of fuel_prices only.
+      - name: Sync prices to the live database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::DATABASE_URL secret is not set, so the live database was not updated. Add it under Settings > Secrets and variables > Actions."
+            exit 0
+          fi
+          git pull --ff-only origin main
+          node scripts/update-fuel-prices.mjs --sql > "$RUNNER_TEMP/fuel-prices.sql"
+          cd server
+          npm ci --omit=dev
+          node db/run.js "$RUNNER_TEMP/fuel-prices.sql"
 
-            **Before merging:** open the source link and check these two
-            numbers against it yourself. This bot cannot tell a correct
-            scrape from a page that changed its layout.
+      - name: Redeploy the site
+        if: steps.prices.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
 
-            **After merging:** this only updates the files in the repo.
-            Re-run the seed against your Postgres database if you want the
-            deployed app to actually show the new prices.
+      - name: Summary
+        run: |
+          {
+            echo "### Fuel prices"
+            echo "- Gasoline: ₱${{ steps.prices.outputs.gasoline }}/L"
+            echo "- Diesel: ₱${{ steps.prices.outputs.diesel }}/L"
+            echo "- As of: ${{ steps.prices.outputs.week_of }}"
+            echo "- Source: ${{ steps.prices.outputs.source }}"
+            echo "- Changed: ${{ steps.prices.outputs.changed }}"
+          } >> "$GITHUB_STEP_SUMMARY"
