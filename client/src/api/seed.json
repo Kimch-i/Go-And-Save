@@ -430,6 +430,18 @@
       "fuelType": "diesel",
       "pricePerLiter": 85.4,
       "weekOf": "2026-11-17"
+    },
+    {
+      "id": 45,
+      "fuelType": "gasoline",
+      "pricePerLiter": 59.5,
+      "weekOf": "2026-11-24"
+    },
+    {
+      "id": 46,
+      "fuelType": "diesel",
+      "pricePerLiter": 84.2,
+      "weekOf": "2026-11-24"
     }
   ],
   "places": [

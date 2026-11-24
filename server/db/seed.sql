@@ -142,6 +142,8 @@ VALUES
   ('gasoline', 72.3, '2026-11-10'),
   ('diesel', 89.2, '2026-11-10'),
   ('gasoline', 70.8, '2026-11-17'),
-  ('diesel', 85.4, '2026-11-17')
+  ('diesel', 85.4, '2026-11-17'),
+  ('gasoline', 59.5, '2026-11-24'),
+  ('diesel', 84.2, '2026-11-24')
 ON CONFLICT (fuel_type, week_of) DO UPDATE SET
   price_per_liter = EXCLUDED.price_per_liter;
